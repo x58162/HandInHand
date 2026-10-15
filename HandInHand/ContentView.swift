@@ -69,54 +69,17 @@ struct ContentView: View {
     }
 
     private var cosmicBackground: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.025, green: 0.015, blue: 0.10),
-                    Color(red: 0.12, green: 0.035, blue: 0.30),
-                    Color(red: 0.29, green: 0.07, blue: 0.42),
-                    Color(red: 0.055, green: 0.025, blue: 0.18)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-
-            Circle()
-                .fill(violet.opacity(0.25))
-                .frame(width: 320, height: 320)
-                .blur(radius: 90)
-                .offset(x: 130, y: -170)
-
-            Circle()
-                .fill(pink.opacity(0.18))
-                .frame(width: 280, height: 280)
-                .blur(radius: 85)
-                .offset(x: -130, y: 150)
-
-            Ellipse()
-                .fill(Color(red: 0.32, green: 0.14, blue: 0.65).opacity(0.5))
-                .frame(height: 180)
-                .blur(radius: 70)
-                .offset(y: 370)
+        GeometryReader { proxy in
+            Image("CosmicLoginArtwork")
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+                .overlay(Color.black.opacity(0.10))
         }
         .ignoresSafeArea()
     }
 
-    private var starField: some View {
-        GeometryReader { proxy in
-            ForEach(0..<85, id: \.self) { index in
-                let x = CGFloat((index * 73 + 19) % 997) / 997 * proxy.size.width
-                let y = CGFloat((index * 137 + 41) % 991) / 991 * proxy.size.height
-                let size: CGFloat = index.isMultiple(of: 9) ? 3 : (index.isMultiple(of: 3) ? 1.8 : 1.1)
-
-                Circle()
-                    .fill(Color.white.opacity(index.isMultiple(of: 4) ? 0.9 : 0.48))
-                    .frame(width: size, height: size)
-                    .shadow(color: pink.opacity(0.9), radius: size * 2)
-                    .position(x: x, y: y)
-            }
-        }
-    }
 
     private var brandHeader: some View {
         VStack(spacing: 8) {
@@ -142,76 +105,9 @@ struct ContentView: View {
     }
 
     private var handsArtwork: some View {
-        GeometryReader { proxy in
-            let w = proxy.size.width
-            let h = proxy.size.height
-            ZStack {
-                // Native SwiftUI artwork: no screenshot or missing asset dependency.
-                Ellipse()
-                    .fill(
-                        RadialGradient(colors: [pink.opacity(0.30), violet.opacity(0.12), .clear],
-                                       center: .center, startRadius: 8, endRadius: w * 0.48)
-                    )
-                    .frame(width: w * 0.98, height: h * 0.92)
-
-                Circle()
-                    .fill(RadialGradient(colors: [.white, Color(red: 1, green: 0.72, blue: 0.96), pink.opacity(0.35)],
-                                         center: .center, startRadius: 2, endRadius: w * 0.16))
-                    .frame(width: w * 0.30, height: w * 0.30)
-                    .overlay(Circle().stroke(.white.opacity(0.75), lineWidth: 1))
-                    .shadow(color: pink.opacity(0.9), radius: 26)
-                    .offset(x: w * 0.19, y: -h * 0.19)
-
-                Circle()
-                    .trim(from: 0.08, to: 0.82)
-                    .stroke(LinearGradient(colors: [pink.opacity(0.08), .white.opacity(0.95), violet],
-                                           startPoint: .topLeading, endPoint: .bottomTrailing),
-                            style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
-                    .frame(width: w * 0.74, height: h * 0.72)
-                    .rotationEffect(.degrees(-32))
-                    .shadow(color: pink.opacity(0.8), radius: 12)
-
-                Circle()
-                    .trim(from: 0.12, to: 0.79)
-                    .stroke(LinearGradient(colors: [violet.opacity(0.05), pink, .white.opacity(0.8)],
-                                           startPoint: .bottomLeading, endPoint: .topTrailing),
-                            style: StrokeStyle(lineWidth: 1.4, lineCap: .round))
-                    .frame(width: w * 0.58, height: h * 0.58)
-                    .rotationEffect(.degrees(145))
-                    .shadow(color: violet.opacity(0.9), radius: 10)
-
-                // Two reaching hands suggested with soft, luminous curves.
-                ReachingRibbon()
-                    .stroke(LinearGradient(colors: [.white, pink, violet.opacity(0.85)],
-                                           startPoint: .topLeading, endPoint: .bottomTrailing),
-                            style: StrokeStyle(lineWidth: 12, lineCap: .round, lineJoin: .round))
-                    .frame(width: w * 0.78, height: h * 0.48)
-                    .shadow(color: pink.opacity(0.85), radius: 12)
-                    .rotationEffect(.degrees(-5))
-
-                ReachingRibbon()
-                    .stroke(LinearGradient(colors: [violet, pink.opacity(0.9), .white],
-                                           startPoint: .bottomLeading, endPoint: .topTrailing),
-                            style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
-                    .frame(width: w * 0.78, height: h * 0.48)
-                    .scaleEffect(x: -1, y: -1)
-                    .shadow(color: violet.opacity(0.95), radius: 14)
-                    .rotationEffect(.degrees(7))
-
-                VStack {
-                    Spacer()
-                    Text("在星河之間，與你相遇")
-                        .font(.system(size: 13, weight: .medium, design: .serif))
-                        .tracking(2)
-                        .foregroundStyle(.white.opacity(0.82))
-                        .shadow(color: pink, radius: 8)
-                        .padding(.bottom, 8)
-                }
-            }
-            .frame(width: w, height: h)
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("紫粉色星河、月光與兩隻伸向彼此的手")
-        }
+        Color.clear
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityHidden(true)
     }
 
 
