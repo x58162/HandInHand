@@ -12,8 +12,6 @@ struct ContentView: View {
         GeometryReader { geometry in
             ZStack {
                 cosmicBackground
-                starField
-                    .allowsHitTesting(false)
 
                 VStack(spacing: 0) {
                     Spacer(minLength: 38)
