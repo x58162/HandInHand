@@ -234,6 +234,7 @@ struct ContentView: View {
         .padding(.horizontal, 16)
     }
 
+}
 
 private struct ReachingRibbon: Shape {
     func path(in rect: CGRect) -> Path {
