@@ -1,16 +1,15 @@
 import SwiftUI
-import AuthenticationServices
 
 struct ContentView: View {
     var body: some View {
-        GeometryReader { proxy in
-            Image("CosmicLoginArtwork")
+        GeometryReader { geometry in
+            Image("HandsArtwork")
                 .resizable()
                 .scaledToFill()
-                .frame(width: proxy.size.width, height: proxy.size.height)
+                .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
-                .ignoresSafeArea()
         }
+        .ignoresSafeArea()
         .preferredColorScheme(.dark)
     }
 }

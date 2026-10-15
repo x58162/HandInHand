@@ -1,1 +1,12 @@
-{"images":[{"filename":"hands.jpg","idiom":"universal"}],"info":{"author":"xcode","version":1}}
+{
+  "images": [
+    {
+      "filename": "HandInHand_background.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
