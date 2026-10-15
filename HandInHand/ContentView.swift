@@ -22,10 +22,10 @@ struct ContentView: View {
                     brandHeader
                         .padding(.top, 22)
 
-                    Spacer(minLength: 18)
+                    Spacer(minLength: 8)
 
                     handsArtwork
-                        .frame(height: geometry.size.height * 0.30)
+                        .frame(height: geometry.size.height * 0.39)
                         .padding(.horizontal, 18)
 
                     Spacer(minLength: 14)
@@ -156,7 +156,7 @@ struct ContentView: View {
                             colors: [Color(red: 1, green: 0.76, blue: 0.94).opacity(0.82),
                                      Color(red: 0.77, green: 0.45, blue: 1).opacity(0.25),
                                      .clear],
-                            center: .center, startRadius: 8, endRadius: proxy.size.height * 0.48
+                            center: .center, startRadius: 8, endRadius: proxy.size.width * 0.48
                         )
                     )
                     .frame(width: proxy.size.height * 1.05, height: proxy.size.height * 1.05)
@@ -171,7 +171,7 @@ struct ContentView: View {
                             center: .center, startRadius: 2, endRadius: proxy.size.height * 0.22
                         )
                     )
-                    .frame(width: proxy.size.height * 0.43, height: proxy.size.height * 0.43)
+                    .frame(width: proxy.size.width * 0.43, height: proxy.size.height * 0.43)
                     .overlay(Circle().stroke(.white.opacity(0.72), lineWidth: 1))
                     .shadow(color: pink.opacity(0.65), radius: 24)
                     .offset(y: -proxy.size.height * 0.16)
@@ -179,12 +179,12 @@ struct ContentView: View {
                 // Misty cloud banks at the horizon.
                 Ellipse()
                     .fill(Color(red: 0.83, green: 0.55, blue: 1).opacity(0.42))
-                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.23)
+                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.27)
                     .blur(radius: 18)
                     .offset(x: -proxy.size.width * 0.18, y: proxy.size.height * 0.22)
                 Ellipse()
                     .fill(Color(red: 1, green: 0.59, blue: 0.88).opacity(0.34))
-                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.20)
+                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.25)
                     .blur(radius: 17)
                     .offset(x: proxy.size.width * 0.22, y: proxy.size.height * 0.25)
 
@@ -198,10 +198,10 @@ struct ContentView: View {
                     .blur(radius: 10)
                     .offset(y: proxy.size.height * 0.40)
 
-                ForEach(0..<7, id: \.self) { i in
+                ForEach(0..<11, id: \.self) { i in
                     Capsule()
-                        .fill(Color.white.opacity(i.isMultiple(of: 2) ? 0.48 : 0.24))
-                        .frame(width: proxy.size.width * (0.14 + CGFloat(i % 3) * 0.07), height: 1)
+                        .fill(Color.white.opacity(i.isMultiple(of: 3) ? 0.58 : 0.24))
+                        .frame(width: proxy.size.width * (0.10 + CGFloat(i % 5) * 0.055), height: 1)
                         .blur(radius: 1.5)
                         .offset(x: CGFloat(i - 3) * proxy.size.width * 0.085,
                                 y: proxy.size.height * (0.34 + CGFloat(i % 4) * 0.045))
