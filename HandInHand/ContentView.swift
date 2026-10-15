@@ -22,10 +22,10 @@ struct ContentView: View {
                     brandHeader
                         .padding(.top, 22)
 
-                    Spacer(minLength: 8)
+                    Spacer(minLength: 4)
 
                     handsArtwork
-                        .frame(height: geometry.size.height * 0.39)
+                        .frame(height: geometry.size.height * 0.47)
                         .padding(.horizontal, 18)
 
                     Spacer(minLength: 14)
@@ -148,103 +148,13 @@ struct ContentView: View {
 
     private var handsArtwork: some View {
         GeometryReader { proxy in
-            ZStack {
-                // A soft moon halo, layered clouds and reflective starlight.
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Color(red: 1, green: 0.76, blue: 0.94).opacity(0.82),
-                                     Color(red: 0.77, green: 0.45, blue: 1).opacity(0.25),
-                                     .clear],
-                            center: .center, startRadius: 8, endRadius: proxy.size.width * 0.48
-                        )
-                    )
-                    .frame(width: proxy.size.height * 1.05, height: proxy.size.height * 1.05)
-                    .offset(y: -proxy.size.height * 0.03)
-
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Color(red: 1, green: 0.82, blue: 0.97),
-                                     Color(red: 1, green: 0.58, blue: 0.87),
-                                     Color(red: 0.64, green: 0.36, blue: 0.98)],
-                            center: .center, startRadius: 2, endRadius: proxy.size.height * 0.22
-                        )
-                    )
-                    .frame(width: proxy.size.width * 0.43, height: proxy.size.height * 0.43)
-                    .overlay(Circle().stroke(.white.opacity(0.72), lineWidth: 1))
-                    .shadow(color: pink.opacity(0.65), radius: 24)
-                    .offset(y: -proxy.size.height * 0.16)
-
-                // Misty cloud banks at the horizon.
-                Ellipse()
-                    .fill(Color(red: 0.83, green: 0.55, blue: 1).opacity(0.42))
-                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.27)
-                    .blur(radius: 18)
-                    .offset(x: -proxy.size.width * 0.18, y: proxy.size.height * 0.22)
-                Ellipse()
-                    .fill(Color(red: 1, green: 0.59, blue: 0.88).opacity(0.34))
-                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.25)
-                    .blur(radius: 17)
-                    .offset(x: proxy.size.width * 0.22, y: proxy.size.height * 0.25)
-
-                // Water reflection beneath the hands.
-                Ellipse()
-                    .fill(
-                        LinearGradient(colors: [pink.opacity(0.55), violet.opacity(0.2), .clear],
-                                       startPoint: .top, endPoint: .bottom)
-                    )
-                    .frame(width: proxy.size.width * 0.86, height: proxy.size.height * 0.23)
-                    .blur(radius: 10)
-                    .offset(y: proxy.size.height * 0.40)
-
-                ForEach(0..<11, id: \.self) { i in
-                    Capsule()
-                        .fill(Color.white.opacity(i.isMultiple(of: 3) ? 0.58 : 0.24))
-                        .frame(width: proxy.size.width * (0.10 + CGFloat(i % 5) * 0.055), height: 1)
-                        .blur(radius: 1.5)
-                        .offset(x: CGFloat(i - 3) * proxy.size.width * 0.085,
-                                y: proxy.size.height * (0.34 + CGFloat(i % 4) * 0.045))
-                }
-
-                // Original SwiftUI vector illustration — not a screenshot or SF Symbol.
-                ReachingHandsShape()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(red: 1, green: 0.91, blue: 1),
-                                     Color(red: 1, green: 0.64, blue: 0.91),
-                                     Color(red: 0.74, green: 0.48, blue: 1)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay {
-                        ReachingHandsShape()
-                            .stroke(Color.white.opacity(0.78), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
-                    }
-                    .shadow(color: pink.opacity(0.75), radius: 13)
-                    .frame(width: proxy.size.width * 0.98, height: proxy.size.height * 0.83)
-                    .offset(y: proxy.size.height * 0.13)
-
-                Image(systemName: "sparkle")
-                    .font(.system(size: 22, weight: .light))
-                    .foregroundStyle(.white)
-                    .shadow(color: pink, radius: 9)
-                    .offset(x: -proxy.size.width * 0.36, y: -proxy.size.height * 0.23)
-
-                Image(systemName: "sparkle")
-                    .font(.system(size: 17, weight: .light))
-                    .foregroundStyle(Color(red: 1, green: 0.72, blue: 0.96))
-                    .shadow(color: pink, radius: 8)
-                    .offset(x: proxy.size.width * 0.34, y: proxy.size.height * 0.03)
-
-                Image(systemName: "star.fill")
-                    .font(.system(size: 7))
-                    .foregroundStyle(.white)
-                    .offset(x: proxy.size.width * 0.27, y: -proxy.size.height * 0.38)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Image("CosmicLoginArtwork")
+                .resizable()
+                .scaledToFit()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .clipped()
+                .accessibilityHidden(true)
         }
-        .accessibilityHidden(true)
     }
 
     private var googleButton: some View {
