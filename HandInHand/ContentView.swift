@@ -149,50 +149,98 @@ struct ContentView: View {
     private var handsArtwork: some View {
         GeometryReader { proxy in
             ZStack {
+                // A soft moon halo, layered clouds and reflective starlight.
                 Circle()
-                    .stroke(
-                        LinearGradient(colors: [pink.opacity(0.9), violet.opacity(0.15), pink.opacity(0.65)],
-                                       startPoint: .topLeading, endPoint: .bottomTrailing),
-                        lineWidth: 1.5
+                    .fill(
+                        RadialGradient(
+                            colors: [Color(red: 1, green: 0.76, blue: 0.94).opacity(0.82),
+                                     Color(red: 0.77, green: 0.45, blue: 1).opacity(0.25),
+                                     .clear],
+                            center: .center, startRadius: 8, endRadius: proxy.size.height * 0.48
+                        )
                     )
-                    .frame(width: min(proxy.size.width * 0.72, 270),
-                           height: min(proxy.size.width * 0.72, 270))
-                    .shadow(color: pink.opacity(0.5), radius: 15)
+                    .frame(width: proxy.size.height * 1.05, height: proxy.size.height * 1.05)
+                    .offset(y: -proxy.size.height * 0.03)
 
                 Circle()
                     .fill(
-                        RadialGradient(colors: [violet.opacity(0.28), .clear],
-                                       center: .center, startRadius: 20, endRadius: 150)
+                        RadialGradient(
+                            colors: [Color(red: 1, green: 0.82, blue: 0.97),
+                                     Color(red: 1, green: 0.58, blue: 0.87),
+                                     Color(red: 0.64, green: 0.36, blue: 0.98)],
+                            center: .center, startRadius: 2, endRadius: proxy.size.height * 0.22
+                        )
                     )
-                    .frame(width: 300, height: 300)
+                    .frame(width: proxy.size.height * 0.43, height: proxy.size.height * 0.43)
+                    .overlay(Circle().stroke(.white.opacity(0.72), lineWidth: 1))
+                    .shadow(color: pink.opacity(0.65), radius: 24)
+                    .offset(y: -proxy.size.height * 0.16)
 
-                Image(systemName: "hands.sparkles.fill")
-                    .resizable()
-                    .renderingMode(.original)
-                    .scaledToFit()
-                    .frame(width: min(proxy.size.width * 0.94, 350), height: proxy.size.height * 0.98)
-                    .font(.system(size: min(proxy.size.width * 0.40, 145), weight: .light))
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(Color.white.opacity(0.95), pink)
-                    .shadow(color: pink.opacity(0.9), radius: 20)
-                    .rotationEffect(.degrees(-12))
+                // Misty cloud banks at the horizon.
+                Ellipse()
+                    .fill(Color(red: 0.83, green: 0.55, blue: 1).opacity(0.42))
+                    .frame(width: proxy.size.width * 0.78, height: proxy.size.height * 0.23)
+                    .blur(radius: 18)
+                    .offset(x: -proxy.size.width * 0.18, y: proxy.size.height * 0.22)
+                Ellipse()
+                    .fill(Color(red: 1, green: 0.59, blue: 0.88).opacity(0.34))
+                    .frame(width: proxy.size.width * 0.72, height: proxy.size.height * 0.20)
+                    .blur(radius: 17)
+                    .offset(x: proxy.size.width * 0.22, y: proxy.size.height * 0.25)
 
-                Image(systemName: "moon.stars.fill")
-                    .font(.system(size: 34, weight: .light))
-                    .foregroundStyle(Color(red: 1, green: 0.76, blue: 0.96))
-                    .shadow(color: pink, radius: 14)
-                    .offset(x: proxy.size.width * 0.28, y: -proxy.size.height * 0.30)
+                // Water reflection beneath the hands.
+                Ellipse()
+                    .fill(
+                        LinearGradient(colors: [pink.opacity(0.55), violet.opacity(0.2), .clear],
+                                       startPoint: .top, endPoint: .bottom)
+                    )
+                    .frame(width: proxy.size.width * 0.86, height: proxy.size.height * 0.23)
+                    .blur(radius: 10)
+                    .offset(y: proxy.size.height * 0.40)
+
+                ForEach(0..<7, id: \.self) { i in
+                    Capsule()
+                        .fill(Color.white.opacity(i.isMultiple(of: 2) ? 0.48 : 0.24))
+                        .frame(width: proxy.size.width * (0.14 + CGFloat(i % 3) * 0.07), height: 1)
+                        .blur(radius: 1.5)
+                        .offset(x: CGFloat(i - 3) * proxy.size.width * 0.085,
+                                y: proxy.size.height * (0.34 + CGFloat(i % 4) * 0.045))
+                }
+
+                // Original SwiftUI vector illustration — not a screenshot or SF Symbol.
+                ReachingHandsShape()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(red: 1, green: 0.91, blue: 1),
+                                     Color(red: 1, green: 0.64, blue: 0.91),
+                                     Color(red: 0.74, green: 0.48, blue: 1)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay {
+                        ReachingHandsShape()
+                            .stroke(Color.white.opacity(0.78), style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
+                    }
+                    .shadow(color: pink.opacity(0.75), radius: 13)
+                    .frame(width: proxy.size.width * 0.98, height: proxy.size.height * 0.83)
+                    .offset(y: proxy.size.height * 0.13)
 
                 Image(systemName: "sparkle")
-                    .font(.system(size: 26, weight: .light))
+                    .font(.system(size: 22, weight: .light))
                     .foregroundStyle(.white)
-                    .shadow(color: pink, radius: 10)
-                    .offset(x: -proxy.size.width * 0.30, y: proxy.size.height * 0.18)
+                    .shadow(color: pink, radius: 9)
+                    .offset(x: -proxy.size.width * 0.36, y: -proxy.size.height * 0.23)
 
                 Image(systemName: "sparkle")
                     .font(.system(size: 17, weight: .light))
-                    .foregroundStyle(pink)
-                    .offset(x: proxy.size.width * 0.30, y: proxy.size.height * 0.27)
+                    .foregroundStyle(Color(red: 1, green: 0.72, blue: 0.96))
+                    .shadow(color: pink, radius: 8)
+                    .offset(x: proxy.size.width * 0.34, y: proxy.size.height * 0.03)
+
+                Image(systemName: "star.fill")
+                    .font(.system(size: 7))
+                    .foregroundStyle(.white)
+                    .offset(x: proxy.size.width * 0.27, y: -proxy.size.height * 0.38)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -288,4 +336,60 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+
+/// Two reaching hands drawn as scalable vector paths for the login illustration.
+private struct ReachingHandsShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
+            CGPoint(x: rect.minX + rect.width * x, y: rect.minY + rect.height * y)
+        }
+        var path = Path()
+
+        // Left arm and open hand reaching inward.
+        path.move(to: p(0.02, 0.91))
+        path.addCurve(to: p(0.31, 0.60), control1: p(0.10, 0.79), control2: p(0.22, 0.65))
+        path.addCurve(to: p(0.37, 0.52), control1: p(0.34, 0.58), control2: p(0.35, 0.53))
+        path.addCurve(to: p(0.42, 0.44), control1: p(0.39, 0.49), control2: p(0.40, 0.45))
+        path.addCurve(to: p(0.47, 0.34), control1: p(0.44, 0.41), control2: p(0.46, 0.36))
+        path.addCurve(to: p(0.49, 0.31), control1: p(0.47, 0.32), control2: p(0.48, 0.30))
+        path.addCurve(to: p(0.50, 0.36), control1: p(0.50, 0.31), control2: p(0.51, 0.34))
+        path.addLine(to: p(0.49, 0.44))
+        path.addCurve(to: p(0.53, 0.37), control1: p(0.50, 0.42), control2: p(0.51, 0.38))
+        path.addCurve(to: p(0.56, 0.38), control1: p(0.54, 0.35), control2: p(0.56, 0.36))
+        path.addLine(to: p(0.55, 0.47))
+        path.addCurve(to: p(0.59, 0.43), control1: p(0.56, 0.46), control2: p(0.58, 0.43))
+        path.addCurve(to: p(0.62, 0.46), control1: p(0.61, 0.42), control2: p(0.63, 0.44))
+        path.addLine(to: p(0.60, 0.53))
+        path.addCurve(to: p(0.64, 0.51), control1: p(0.61, 0.53), control2: p(0.63, 0.50))
+        path.addCurve(to: p(0.66, 0.55), control1: p(0.66, 0.52), control2: p(0.67, 0.54))
+        path.addCurve(to: p(0.59, 0.65), control1: p(0.64, 0.60), control2: p(0.62, 0.64))
+        path.addCurve(to: p(0.52, 0.73), control1: p(0.56, 0.67), control2: p(0.54, 0.70))
+        path.addLine(to: p(0.45, 0.84))
+        path.closeSubpath()
+
+        // Right arm and hand mirror the reach, with a small gap between fingertips.
+        path.move(to: p(0.98, 0.91))
+        path.addCurve(to: p(0.70, 0.61), control1: p(0.90, 0.79), control2: p(0.78, 0.66))
+        path.addCurve(to: p(0.65, 0.54), control1: p(0.67, 0.59), control2: p(0.66, 0.55))
+        path.addCurve(to: p(0.62, 0.48), control1: p(0.63, 0.52), control2: p(0.62, 0.49))
+        path.addCurve(to: p(0.59, 0.40), control1: p(0.61, 0.45), control2: p(0.60, 0.42))
+        path.addCurve(to: p(0.57, 0.39), control1: p(0.58, 0.38), control2: p(0.57, 0.38))
+        path.addCurve(to: p(0.56, 0.44), control1: p(0.56, 0.40), control2: p(0.55, 0.42))
+        path.addLine(to: p(0.57, 0.49))
+        path.addCurve(to: p(0.53, 0.43), control1: p(0.56, 0.47), control2: p(0.55, 0.44))
+        path.addCurve(to: p(0.51, 0.44), control1: p(0.52, 0.42), control2: p(0.51, 0.42))
+        path.addLine(to: p(0.52, 0.51))
+        path.addCurve(to: p(0.49, 0.48), control1: p(0.51, 0.50), control2: p(0.50, 0.48))
+        path.addCurve(to: p(0.47, 0.50), control1: p(0.48, 0.47), control2: p(0.47, 0.48))
+        path.addLine(to: p(0.49, 0.56))
+        path.addCurve(to: p(0.45, 0.54), control1: p(0.48, 0.55), control2: p(0.46, 0.53))
+        path.addCurve(to: p(0.43, 0.57), control1: p(0.44, 0.53), control2: p(0.42, 0.55))
+        path.addCurve(to: p(0.50, 0.66), control1: p(0.45, 0.62), control2: p(0.47, 0.65))
+        path.addCurve(to: p(0.56, 0.74), control1: p(0.53, 0.68), control2: p(0.54, 0.71))
+        path.addLine(to: p(0.63, 0.84))
+        path.closeSubpath()
+        return path
+    }
 }
