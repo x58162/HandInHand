@@ -148,35 +148,13 @@ struct ContentView: View {
 
     private var handsArtwork: some View {
         GeometryReader { proxy in
-            ZStack {
-                // Load the detailed illustration when the asset is present.
-                Image("CosmicLoginArtwork")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: proxy.size.width, height: proxy.size.height)
-
-                // Keep a visible fallback until the image asset is bundled in the Xcode project.
-                ReachingHandsShape()
-                    .fill(
-                        LinearGradient(
-                            colors: [Color(red: 1, green: 0.88, blue: 0.98),
-                                     Color(red: 1, green: 0.60, blue: 0.86),
-                                     Color(red: 0.67, green: 0.49, blue: 0.98)],
-                            startPoint: .topLeading, endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay {
-                        ReachingHandsShape()
-                            .stroke(.white.opacity(0.88),
-                                    style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round))
-                    }
-                    .shadow(color: pink.opacity(0.85), radius: 16)
-                    .frame(width: proxy.size.width * 0.98, height: proxy.size.height * 0.82)
-                    .offset(y: proxy.size.height * 0.10)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            Image("CosmicLoginArtwork")
+                .resizable()
+                .scaledToFit()
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .accessibilityLabel("牽手星河主視覺")
         }
-        .accessibilityHidden(true)
     }
 
     private var googleButton: some View {
@@ -270,58 +248,3 @@ struct ContentView: View {
     ContentView()
 }
 
-
-/// Two reaching hands drawn as scalable vector paths for the login illustration.
-private struct ReachingHandsShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint {
-            CGPoint(x: rect.minX + rect.width * x, y: rect.minY + rect.height * y)
-        }
-        var path = Path()
-
-        // Left arm and open hand reaching inward.
-        path.move(to: p(0.02, 0.91))
-        path.addCurve(to: p(0.31, 0.60), control1: p(0.10, 0.79), control2: p(0.22, 0.65))
-        path.addCurve(to: p(0.37, 0.52), control1: p(0.34, 0.58), control2: p(0.35, 0.53))
-        path.addCurve(to: p(0.42, 0.44), control1: p(0.39, 0.49), control2: p(0.40, 0.45))
-        path.addCurve(to: p(0.47, 0.34), control1: p(0.44, 0.41), control2: p(0.46, 0.36))
-        path.addCurve(to: p(0.49, 0.31), control1: p(0.47, 0.32), control2: p(0.48, 0.30))
-        path.addCurve(to: p(0.50, 0.36), control1: p(0.50, 0.31), control2: p(0.51, 0.34))
-        path.addLine(to: p(0.49, 0.44))
-        path.addCurve(to: p(0.53, 0.37), control1: p(0.50, 0.42), control2: p(0.51, 0.38))
-        path.addCurve(to: p(0.56, 0.38), control1: p(0.54, 0.35), control2: p(0.56, 0.36))
-        path.addLine(to: p(0.55, 0.47))
-        path.addCurve(to: p(0.59, 0.43), control1: p(0.56, 0.46), control2: p(0.58, 0.43))
-        path.addCurve(to: p(0.62, 0.46), control1: p(0.61, 0.42), control2: p(0.63, 0.44))
-        path.addLine(to: p(0.60, 0.53))
-        path.addCurve(to: p(0.64, 0.51), control1: p(0.61, 0.53), control2: p(0.63, 0.50))
-        path.addCurve(to: p(0.66, 0.55), control1: p(0.66, 0.52), control2: p(0.67, 0.54))
-        path.addCurve(to: p(0.59, 0.65), control1: p(0.64, 0.60), control2: p(0.62, 0.64))
-        path.addCurve(to: p(0.52, 0.73), control1: p(0.56, 0.67), control2: p(0.54, 0.70))
-        path.addLine(to: p(0.45, 0.84))
-        path.closeSubpath()
-
-        // Right arm and hand mirror the reach, with a small gap between fingertips.
-        path.move(to: p(0.98, 0.91))
-        path.addCurve(to: p(0.70, 0.61), control1: p(0.90, 0.79), control2: p(0.78, 0.66))
-        path.addCurve(to: p(0.65, 0.54), control1: p(0.67, 0.59), control2: p(0.66, 0.55))
-        path.addCurve(to: p(0.62, 0.48), control1: p(0.63, 0.52), control2: p(0.62, 0.49))
-        path.addCurve(to: p(0.59, 0.40), control1: p(0.61, 0.45), control2: p(0.60, 0.42))
-        path.addCurve(to: p(0.57, 0.39), control1: p(0.58, 0.38), control2: p(0.57, 0.38))
-        path.addCurve(to: p(0.56, 0.44), control1: p(0.56, 0.40), control2: p(0.55, 0.42))
-        path.addLine(to: p(0.57, 0.49))
-        path.addCurve(to: p(0.53, 0.43), control1: p(0.56, 0.47), control2: p(0.55, 0.44))
-        path.addCurve(to: p(0.51, 0.44), control1: p(0.52, 0.42), control2: p(0.51, 0.42))
-        path.addLine(to: p(0.52, 0.51))
-        path.addCurve(to: p(0.49, 0.48), control1: p(0.51, 0.50), control2: p(0.50, 0.48))
-        path.addCurve(to: p(0.47, 0.50), control1: p(0.48, 0.47), control2: p(0.47, 0.48))
-        path.addLine(to: p(0.49, 0.56))
-        path.addCurve(to: p(0.45, 0.54), control1: p(0.48, 0.55), control2: p(0.46, 0.53))
-        path.addCurve(to: p(0.43, 0.57), control1: p(0.44, 0.53), control2: p(0.42, 0.55))
-        path.addCurve(to: p(0.50, 0.66), control1: p(0.45, 0.62), control2: p(0.47, 0.65))
-        path.addCurve(to: p(0.56, 0.74), control1: p(0.53, 0.68), control2: p(0.54, 0.71))
-        path.addLine(to: p(0.63, 0.84))
-        path.closeSubpath()
-        return path
-    }
-}
