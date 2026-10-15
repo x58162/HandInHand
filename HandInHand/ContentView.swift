@@ -67,17 +67,38 @@ struct ContentView: View {
     }
 
     private var cosmicBackground: some View {
-        GeometryReader { proxy in
-            Image("CosmicLoginArtwork")
-                .resizable()
-                .scaledToFill()
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .clipped()
-                .overlay(Color.black.opacity(0.10))
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color(red: 0.025, green: 0.015, blue: 0.10),
+                    Color(red: 0.12, green: 0.035, blue: 0.30),
+                    Color(red: 0.29, green: 0.07, blue: 0.42),
+                    Color(red: 0.055, green: 0.025, blue: 0.18)
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(violet.opacity(0.25))
+                .frame(width: 320, height: 320)
+                .blur(radius: 90)
+                .offset(x: 130, y: -170)
+
+            Circle()
+                .fill(pink.opacity(0.18))
+                .frame(width: 280, height: 280)
+                .blur(radius: 85)
+                .offset(x: -130, y: 150)
+
+            Ellipse()
+                .fill(Color(red: 0.32, green: 0.14, blue: 0.65).opacity(0.5))
+                .frame(height: 180)
+                .blur(radius: 70)
+                .offset(y: 370)
         }
         .ignoresSafeArea()
     }
-
 
     private var brandHeader: some View {
         VStack(spacing: 8) {
