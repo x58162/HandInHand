@@ -167,6 +167,10 @@ struct ContentView: View {
                     .frame(width: 300, height: 300)
 
                 Image("HandsArtwork")
+                    .resizable()
+                    .renderingMode(.original)
+                    .scaledToFit()
+                    .frame(width: min(proxy.size.width * 0.94, 350), height: proxy.size.height * 0.98)
                     .font(.system(size: min(proxy.size.width * 0.40, 145), weight: .light))
                     .symbolRenderingMode(.palette)
                     .foregroundStyle(Color.white.opacity(0.95), pink)
