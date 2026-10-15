@@ -148,13 +148,35 @@ struct ContentView: View {
 
     private var handsArtwork: some View {
         GeometryReader { proxy in
-            Image("CosmicLoginArtwork")
-                .resizable()
-                .scaledToFit()
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .clipped()
-                .accessibilityHidden(true)
+            ZStack {
+                // Load the detailed illustration when the asset is present.
+                Image("CosmicLoginArtwork")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+
+                // Keep a visible fallback until the image asset is bundled in the Xcode project.
+                ReachingHandsShape()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(red: 1, green: 0.88, blue: 0.98),
+                                     Color(red: 1, green: 0.60, blue: 0.86),
+                                     Color(red: 0.67, green: 0.49, blue: 0.98)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay {
+                        ReachingHandsShape()
+                            .stroke(.white.opacity(0.88),
+                                    style: StrokeStyle(lineWidth: 1.1, lineCap: .round, lineJoin: .round))
+                    }
+                    .shadow(color: pink.opacity(0.85), radius: 16)
+                    .frame(width: proxy.size.width * 0.98, height: proxy.size.height * 0.82)
+                    .offset(y: proxy.size.height * 0.10)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .accessibilityHidden(true)
     }
 
     private var googleButton: some View {
