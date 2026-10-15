@@ -148,12 +148,74 @@ struct ContentView: View {
 
     private var handsArtwork: some View {
         GeometryReader { proxy in
-            Image("CosmicLoginArtwork")
-                .resizable()
-                .scaledToFit()
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .accessibilityLabel("牽手星河主視覺")
+            let w = proxy.size.width
+            let h = proxy.size.height
+            ZStack {
+                // Native SwiftUI artwork: no screenshot or missing asset dependency.
+                Ellipse()
+                    .fill(
+                        RadialGradient(colors: [pink.opacity(0.30), violet.opacity(0.12), .clear],
+                                       center: .center, startRadius: 8, endRadius: w * 0.48)
+                    )
+                    .frame(width: w * 0.98, height: h * 0.92)
+
+                Circle()
+                    .fill(RadialGradient(colors: [.white, Color(red: 1, green: 0.72, blue: 0.96), pink.opacity(0.35)],
+                                         center: .center, startRadius: 2, endRadius: w * 0.16))
+                    .frame(width: w * 0.30, height: w * 0.30)
+                    .overlay(Circle().stroke(.white.opacity(0.75), lineWidth: 1))
+                    .shadow(color: pink.opacity(0.9), radius: 26)
+                    .offset(x: w * 0.19, y: -h * 0.19)
+
+                Circle()
+                    .trim(from: 0.08, to: 0.82)
+                    .stroke(LinearGradient(colors: [pink.opacity(0.08), .white.opacity(0.95), violet],
+                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                            style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
+                    .frame(width: w * 0.74, height: h * 0.72)
+                    .rotationEffect(.degrees(-32))
+                    .shadow(color: pink.opacity(0.8), radius: 12)
+
+                Circle()
+                    .trim(from: 0.12, to: 0.79)
+                    .stroke(LinearGradient(colors: [violet.opacity(0.05), pink, .white.opacity(0.8)],
+                                           startPoint: .bottomLeading, endPoint: .topTrailing),
+                            style: StrokeStyle(lineWidth: 1.4, lineCap: .round))
+                    .frame(width: w * 0.58, height: h * 0.58)
+                    .rotationEffect(.degrees(145))
+                    .shadow(color: violet.opacity(0.9), radius: 10)
+
+                // Two reaching hands suggested with soft, luminous curves.
+                ReachingRibbon()
+                    .stroke(LinearGradient(colors: [.white, pink, violet.opacity(0.85)],
+                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                            style: StrokeStyle(lineWidth: 12, lineCap: .round, lineJoin: .round))
+                    .frame(width: w * 0.78, height: h * 0.48)
+                    .shadow(color: pink.opacity(0.85), radius: 12)
+                    .rotationEffect(.degrees(-5))
+
+                ReachingRibbon()
+                    .stroke(LinearGradient(colors: [violet, pink.opacity(0.9), .white],
+                                           startPoint: .bottomLeading, endPoint: .topTrailing),
+                            style: StrokeStyle(lineWidth: 7, lineCap: .round, lineJoin: .round))
+                    .frame(width: w * 0.78, height: h * 0.48)
+                    .scaleEffect(x: -1, y: -1)
+                    .shadow(color: violet.opacity(0.95), radius: 14)
+                    .rotationEffect(.degrees(7))
+
+                VStack {
+                    Spacer()
+                    Text("在星河之間，與你相遇")
+                        .font(.system(size: 13, weight: .medium, design: .serif))
+                        .tracking(2)
+                        .foregroundStyle(.white.opacity(0.82))
+                        .shadow(color: pink, radius: 8)
+                        .padding(.bottom, 8)
+                }
+            }
+            .frame(width: w, height: h)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("紫粉色星河、月光與兩隻伸向彼此的手")
         }
     }
 
@@ -241,6 +303,23 @@ struct ContentView: View {
             .underline()
         }
         .padding(.horizontal, 16)
+    }
+}
+
+private struct ReachingRibbon: Shape {
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX + rect.width * 0.04, y: rect.minY + rect.height * 0.22))
+        p.addCurve(to: CGPoint(x: rect.midX - rect.width * 0.04, y: rect.midY + rect.height * 0.04),
+                   control1: CGPoint(x: rect.width * 0.20, y: rect.height * 0.05),
+                   control2: CGPoint(x: rect.width * 0.28, y: rect.height * 0.60))
+        p.addCurve(to: CGPoint(x: rect.midX + rect.width * 0.08, y: rect.midY + rect.height * 0.08),
+                   control1: CGPoint(x: rect.midX - rect.width * 0.02, y: rect.midY - rect.height * 0.04),
+                   control2: CGPoint(x: rect.midX + rect.width * 0.02, y: rect.midY + rect.height * 0.02))
+        p.addCurve(to: CGPoint(x: rect.maxX - rect.width * 0.04, y: rect.maxY - rect.height * 0.18),
+                   control1: CGPoint(x: rect.width * 0.72, y: rect.height * 0.36),
+                   control2: CGPoint(x: rect.width * 0.84, y: rect.height * 0.90))
+        return p
     }
 }
 
