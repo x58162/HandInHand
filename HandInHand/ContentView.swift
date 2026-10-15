@@ -215,6 +215,26 @@ struct ContentView: View {
     }
 
 
+    private var legalText: some View {
+        VStack(spacing: 7) {
+            Text("登入即表示您同意")
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.78))
+
+            HStack(spacing: 8) {
+                Button("《服務條款》") { }
+                Text("與")
+                    .foregroundStyle(.white.opacity(0.78))
+                Button("《隱私權政策》") { }
+            }
+            .font(.system(size: 12, weight: .medium))
+            .foregroundStyle(Color(red: 1, green: 0.68, blue: 0.96))
+            .underline()
+        }
+        .padding(.horizontal, 16)
+    }
+
+
 private struct ReachingRibbon: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
