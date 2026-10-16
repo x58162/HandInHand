@@ -653,25 +653,34 @@ struct MainInterfaceView: View {
 
     private func fallbackRoomArtwork(_ room: VoiceRoom) -> some View {
         ZStack {
+            Image("HandsArtwork")
+                .resizable()
+                .scaledToFill()
+
             LinearGradient(
-                colors: [Palette.violet, Color(red: 0.26, green: 0.18, blue: 0.42), Palette.rose.opacity(0.85)],
+                colors: [
+                    Palette.violet.opacity(0.22),
+                    Color(red: 0.16, green: 0.10, blue: 0.30).opacity(0.20),
+                    Palette.rose.opacity(0.62)
+                ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
             Circle()
-                .fill(.white.opacity(0.11))
-                .frame(width: 150, height: 150)
-                .offset(x: 105, y: -45)
+                .fill(.white.opacity(0.12))
+                .frame(width: 130, height: 130)
+                .offset(x: 115, y: -44)
 
             Circle()
-                .stroke(.white.opacity(0.18), lineWidth: 1)
-                .frame(width: 95, height: 95)
-                .offset(x: -100, y: 42)
+                .stroke(.white.opacity(0.25), lineWidth: 1)
+                .frame(width: 80, height: 80)
+                .offset(x: -100, y: 40)
 
             Image(systemName: room.mode == "personal" ? "person.crop.circle.fill" : "waveform")
                 .font(.system(size: 38, weight: .medium))
-                .foregroundStyle(.white.opacity(0.88))
+                .foregroundStyle(.white.opacity(0.95))
+                .shadow(color: .black.opacity(0.30), radius: 8, y: 2)
         }
     }
 
@@ -760,10 +769,19 @@ private struct RoomPreviewSheet: View {
 
     private var placeholderImage: some View {
         ZStack {
-            LinearGradient(colors: [Palette.violet, Palette.rose], startPoint: .topLeading, endPoint: .bottomTrailing)
-            Image(systemName: "waveform")
+            Image("HandsArtwork")
+                .resizable()
+                .scaledToFill()
+            LinearGradient(
+                colors: [Palette.violet.opacity(0.25), Palette.rose.opacity(0.60)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            Image(systemName: room.mode == "personal" ? "person.crop.circle.fill" : "waveform")
                 .font(.system(size: 35, weight: .semibold))
                 .foregroundStyle(.white)
+                .shadow(color: .black.opacity(0.3), radius: 8, y: 2)
         }
+        .clipped()
     }
 }
