@@ -22,7 +22,7 @@ struct ContentView: View {
 
                 VStack(spacing: 0) {
                     brandHeader
-                        .padding(.top, geometry.size.height * 0.07)
+                        .padding(.top, geometry.size.height * 0.19)
 
                     Spacer(minLength: 12)
 
@@ -30,7 +30,9 @@ struct ContentView: View {
 
                     VStack(spacing: 12) {
                         OfficialGoogleSignInButton(action: handleGoogleSignIn)
-                            .frame(width: buttonWidth, height: 48)
+                            // Google's official button draws a 4pt inset border/shadow on every side.
+                            // Add 8pt to its container so the visible white background matches Apple's width.
+                            .frame(width: buttonWidth + 8, height: 48)
 
                         SignInWithAppleButton(
                             .signIn,
