@@ -409,9 +409,16 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
             }
 
             // didTap() checks the button's window before starting a request.
-            // This fallback only protects against the window being detached
-            // during an authorization transition.
-            return ASPresentationAnchor()
+            // If that window becomes unavailable during authorization, use an
+            // existing window from the foreground scene. Never create a detached
+            // empty presentation window as a fallback.
+            if let window = activeScene?.windows.first {
+                return window
+            }
+
+            // The request must have a real app window to present from. This path
+            // should be unreachable because didTap() validates the anchor first.
+            preconditionFailure("Apple Sign In requires an active app window.")
         }
     }
 }
