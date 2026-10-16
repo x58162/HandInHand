@@ -9,19 +9,28 @@
 /* Begin PBXBuildFile section */
 		CED8E8ED3080CBB100B908FF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CED8E8EB3080CBB100B908FF /* GoogleSignIn */; };
 		CED8E8EE3080CBB100B908FF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CED8E8EC3080CBB100B908FF /* GoogleSignInSwift */; };
+
+		A10000000000000000000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* ContentView.swift */; };
+		A10000000000000000000002 /* MainInterfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* MainInterfaceView.swift */; };
+		A10000000000000000000003 /* VoiceServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* VoiceServer.swift */; };
+		A10000000000000000000004 /* ProfileSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* ProfileSetupView.swift */; };
+		A10000000000000000000005 /* HandInHandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* HandInHandApp.swift */; };
+		A10000000000000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Assets.xcassets */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		CED8E8DC3080CBAD00B908FF /* HandInHand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandInHand.app; sourceTree = BUILT_PRODUCTS_DIR; };
+
+		A20000000000000000000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* MainInterfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainInterfaceView.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* VoiceServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceServer.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* ProfileSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSetupView.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* HandInHandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandInHandApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		CED8E8DE3080CBAD00B908FF /* HandInHand */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HandInHand;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		CED8E8D93080CBAD00B908FF /* Frameworks */ = {
@@ -36,6 +45,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CED8E8DE3080CBAD00B908FF /* HandInHand */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* ContentView.swift */,
+				A20000000000000000000002 /* MainInterfaceView.swift */,
+				A20000000000000000000003 /* VoiceServer.swift */,
+				A20000000000000000000004 /* ProfileSetupView.swift */,
+				A20000000000000000000005 /* HandInHandApp.swift */,
+				A20000000000000000000006 /* Assets.xcassets */,
+			);
+			path = HandInHand;
+			sourceTree = "<group>";
+		};
+
 		CED8E8D33080CBAD00B908FF = {
 			isa = PBXGroup;
 			children = (
@@ -66,9 +89,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				CED8E8DE3080CBAD00B908FF /* HandInHand */,
 			);
 			name = HandInHand;
 			packageProductDependencies = (
@@ -127,6 +147,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000006 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +158,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000001 /* ContentView.swift in Sources */,
+				A10000000000000000000002 /* MainInterfaceView.swift in Sources */,
+				A10000000000000000000003 /* VoiceServer.swift in Sources */,
+				A10000000000000000000004 /* ProfileSetupView.swift in Sources */,
+				A10000000000000000000005 /* HandInHandApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
