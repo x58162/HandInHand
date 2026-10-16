@@ -63,10 +63,14 @@ struct MainInterfaceView: View {
         .onAppear {
             roomStore.connect()
         }
-        .sheet(item: $selectedRoom) { room in
-            RoomPreviewSheet(room: room)
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
+        .fullScreenCover(item: $selectedRoom) { room in
+            VoiceRoomDetailView(
+                room: room,
+                sessionToken: sessionToken,
+                currentUserId: userId
+            ) {
+                selectedRoom = nil
+            }
         }
     }
 
@@ -701,87 +705,3 @@ struct MainInterfaceView: View {
     }
 }
 
-private struct RoomPreviewSheet: View {
-    let room: VoiceRoom
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        ZStack {
-            Palette.background.ignoresSafeArea()
-
-            VStack(spacing: 16) {
-                Group {
-                    if let url = room.displayImageURL {
-                        AsyncImage(url: url) { phase in
-                            if let image = phase.image {
-                                image.resizable().scaledToFill()
-                            } else {
-                                placeholderImage
-                            }
-                        }
-                    } else {
-                        placeholderImage
-                    }
-                }
-                .frame(width: 108, height: 108)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-
-                Text(room.name)
-                    .font(.system(size: 23, weight: .bold, design: .rounded))
-                    .foregroundStyle(Palette.ink)
-
-                Text("房主：\(room.ownerName)")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Palette.muted)
-
-                HStack(spacing: 16) {
-                    Label("\(room.userCount) 人在線", systemImage: "person.2.fill")
-                    Label("\(room.micCount)/8 麥", systemImage: "mic.fill")
-                }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Palette.violet)
-
-                Text(room.locked ? "這間房目前已上鎖。" : "房間資料來自牽手伺服器。")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Palette.muted)
-
-                Text("目前先完成真實房間列表與圖片顯示；加入房間與即時語音會接著串接。")
-                    .font(.system(size: 12))
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(Palette.muted)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Button {
-                    dismiss()
-                } label: {
-                    Text("返回房間列表")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 15)
-                        .background(LinearGradient(colors: [Palette.violet, Palette.rose], startPoint: .leading, endPoint: .trailing), in: Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(28)
-        }
-    }
-
-    private var placeholderImage: some View {
-        ZStack {
-            Image("HandsArtwork")
-                .resizable()
-                .scaledToFill()
-            LinearGradient(
-                colors: [Palette.violet.opacity(0.25), Palette.rose.opacity(0.60)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            Image(systemName: room.mode == "personal" ? "person.crop.circle.fill" : "waveform")
-                .font(.system(size: 35, weight: .semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.3), radius: 8, y: 2)
-        }
-        .clipped()
-    }
-}
