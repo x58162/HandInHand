@@ -42,8 +42,11 @@ struct ContentView: View {
                             onCompletion: handleAppleSignIn
                         )
                         .signInWithAppleButtonStyle(.black)
-                        .frame(width: buttonWidth, height: 48)
+                        // Match the Google SDK's visible 40pt button face.
+                        .frame(width: buttonWidth, height: 40)
                         .cornerRadius(2)
+                        // Keep the same 48pt layout slot so spacing remains aligned.
+                        .frame(width: buttonWidth, height: 48)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, geometry.size.height * 0.17)
