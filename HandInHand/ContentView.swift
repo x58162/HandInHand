@@ -5,6 +5,10 @@ import GoogleSignIn
 
 struct ContentView: View {
     @State private var signedInUser: SignedInUser?
+    @State private var pendingProfile: PendingProfile?
+    @State private var sessionToken = ""
+    @State private var serverUserId = ""
+    @State private var isAuthenticating = false
     @State private var showingLoginMessage = false
     @State private var loginMessageTitle = ""
     @State private var loginMessage = ""
@@ -14,12 +18,28 @@ struct ContentView: View {
     var body: some View {
         Group {
             if let signedInUser {
-                MainInterfaceView(user: signedInUser) {
-                    self.signedInUser = nil
+                MainInterfaceView(
+                    user: signedInUser,
+                    sessionToken: sessionToken,
+                    userId: serverUserId
+                ) {
+                    logout()
                 }
             } else {
                 loginScreen
             }
+        }
+        .fullScreenCover(item: $pendingProfile) { pending in
+            ProfileSetupView(pendingProfile: pending) { completedUser in
+                serverUserId = completedUser.userId
+                signedInUser = SignedInUser(
+                    displayName: completedUser.displayName,
+                    email: completedUser.email,
+                    provider: completedUser.provider == "apple" ? "Apple" : "Google"
+                )
+                pendingProfile = nil
+            }
+            .interactiveDismissDisabled()
         }
         .alert(loginMessageTitle, isPresented: $showingLoginMessage) {
             Button("知道了", role: .cancel) { }
@@ -139,20 +159,41 @@ struct ContentView: View {
                 return
             }
 
-            let profile = result.user.profile
-            let email = profile?.email ?? ""
-            let displayName = profile?.name
-                ?? email.components(separatedBy: "@").first
-                ?? "Google 使用者"
-
-            // Show the next app screen after Google returns a successful identity result.
-            // The membership backend is not connected yet, so this remains preview mode.
-            DispatchQueue.main.async {
-                self.signedInUser = SignedInUser(
-                    displayName: displayName,
-                    email: email,
-                    provider: "Google"
+            guard let idToken = result.user.idToken?.tokenString, !idToken.isEmpty else {
+                showLoginMessage(
+                    title: "無法完成 Google 登入",
+                    message: "Google 沒有回傳 ID Token，請重新登入。"
                 )
+                return
+            }
+
+            isAuthenticating = true
+            Task {
+                do {
+                    let response = try await VoiceServerAPIClient.shared.verifyGoogle(idToken: idToken)
+                    sessionToken = response.sessionToken
+                    serverUserId = response.user.userId
+                    isAuthenticating = false
+
+                    if response.needsProfile || !response.user.profileCompleted {
+                        pendingProfile = PendingProfile(
+                            sessionToken: response.sessionToken,
+                            serverUser: response.user
+                        )
+                    } else {
+                        signedInUser = SignedInUser(
+                            displayName: response.user.displayName,
+                            email: response.user.email,
+                            provider: response.user.provider == "apple" ? "Apple" : "Google"
+                        )
+                    }
+                } catch {
+                    isAuthenticating = false
+                    showLoginMessage(
+                        title: "牽手伺服器登入失敗",
+                        message: error.localizedDescription
+                    )
+                }
             }
         }
     }
@@ -168,28 +209,12 @@ struct ContentView: View {
                 return
             }
 
-            let email = credential.email ?? ""
-            let returnedName = credential.fullName
-                .map { PersonNameComponentsFormatter().string(from: $0) }
-                ?? ""
-            let displayName: String
-            if !returnedName.isEmpty {
-                displayName = returnedName
-            } else if let emailName = email.components(separatedBy: "@").first, !emailName.isEmpty {
-                displayName = emailName
-            } else {
-                displayName = "Apple 使用者"
-            }
-
-            // Apple may only return the name/email on the first authorization.
-            // Continue into preview mode on a successful native authorization.
-            DispatchQueue.main.async {
-                self.signedInUser = SignedInUser(
-                    displayName: displayName,
-                    email: email,
-                    provider: "Apple"
-                )
-            }
+            // The current server ZIP contains no Apple token-verification endpoint.
+            // Do not treat local Apple authorization alone as a completed member login.
+            showLoginMessage(
+                title: "Apple 身分驗證成功",
+                message: "Apple 已完成裝置端驗證，但牽手伺服器目前尚未實作 Apple 憑證驗證。要先接通會員資料庫，請暫時使用 Google 登入。"
+            )
 
         case .failure(let error):
             if let authorizationError = error as? ASAuthorizationError,
@@ -198,6 +223,18 @@ struct ContentView: View {
             }
 
             showLoginMessage(title: "Apple 登入未完成", message: error.localizedDescription)
+        }
+    }
+
+    private func logout() {
+        let token = sessionToken
+        signedInUser = nil
+        pendingProfile = nil
+        sessionToken = ""
+        serverUserId = ""
+
+        Task {
+            await VoiceServerAPIClient.shared.logout(sessionToken: token)
         }
     }
 
