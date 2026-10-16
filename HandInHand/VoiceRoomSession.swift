@@ -31,6 +31,14 @@ struct VoiceRoomMember: Decodable, Identifiable {
     }
 }
 
+struct VoiceRoomChatMessage: Identifiable {
+    let id = UUID()
+    let userId: String
+    let userName: String
+    let text: String
+    let timestamp: Date
+}
+
 struct VoiceRoomPendingMicRequest: Decodable, Identifiable {
     let userId: String
     let nickname: String
@@ -68,6 +76,7 @@ final class VoiceRoomSessionStore: ObservableObject,
     @Published private(set) var status = "正在連接房間…"
     @Published private(set) var errorMessage: String?
     @Published private(set) var micMessage: String?
+    @Published private(set) var chatMessages: [VoiceRoomChatMessage] = []
     @Published private(set) var isJoined = false
     @Published private(set) var isMicrophoneOn = false
     @Published private(set) var isStartingMicrophone = false
@@ -259,6 +268,24 @@ final class VoiceRoomSessionStore: ObservableObject,
         micMessage = nil
     }
 
+    /// Sends a room-wide text message over the same WebSocket used by the voice room.
+    /// The server broadcasts it back as a "chat" event to every room member.
+    @discardableResult
+    func sendChatMessage(_ rawText: String) -> Bool {
+        let text = rawText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return false }
+        guard isJoined, socket != nil, !isLeaving else {
+            errorMessage = "房間尚未連線，現在無法傳送訊息。"
+            return false
+        }
+
+        send([
+            "type": "chat_message",
+            "text": String(text.prefix(300))
+        ])
+        return true
+    }
+
     // MARK: WebSocket signaling
 
     private func send(_ payload: [String: Any]) {
@@ -313,6 +340,32 @@ final class VoiceRoomSessionStore: ObservableObject,
                         send(["type": "get_rtp_capabilities"])
                     }
                     syncMicrophoneStateFromSnapshot()
+
+                case "chat", "chat_message":
+                    guard let text = object["text"] as? String else { break }
+                    let cleanedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                    guard !cleanedText.isEmpty else { break }
+
+                    let userId = object["userId"] as? String ?? "guest"
+                    let userName = object["userName"] as? String
+                        ?? object["nickname"] as? String
+                        ?? userId
+                    let timestampMilliseconds = (object["timestamp"] as? NSNumber)?.doubleValue
+                    let timestamp = timestampMilliseconds.map {
+                        Date(timeIntervalSince1970: $0 / 1000)
+                    } ?? Date()
+
+                    chatMessages.append(
+                        VoiceRoomChatMessage(
+                            userId: userId,
+                            userName: userName,
+                            text: String(cleanedText.prefix(300)),
+                            timestamp: timestamp
+                        )
+                    )
+                    if chatMessages.count > 100 {
+                        chatMessages.removeFirst(chatMessages.count - 100)
+                    }
 
                 case "rtp_capabilities":
                     if let data = object["data"] {
