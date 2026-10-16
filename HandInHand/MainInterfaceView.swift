@@ -472,7 +472,7 @@ struct MainInterfaceView: View {
             .background(.white, in: RoundedRectangle(cornerRadius: 20))
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line, lineWidth: 1))
 
-            Button(role: .destructive, action: onLogout) {
+            Button(role: .destructive, action: performLogout) {
                 HStack {
                     Spacer()
                     Image(systemName: "rectangle.portrait.and.arrow.right")
@@ -661,6 +661,11 @@ struct MainInterfaceView: View {
                 .font(.system(size: 38, weight: .medium))
                 .foregroundStyle(.white.opacity(0.88))
         }
+    }
+
+    private func performLogout() {
+        roomStore.disconnect()
+        onLogout()
     }
 
     private var userInitial: String {
