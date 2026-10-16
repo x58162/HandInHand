@@ -30,9 +30,10 @@ struct ContentView: View {
 
                     VStack(spacing: 12) {
                         OfficialGoogleSignInButton(action: handleGoogleSignIn)
-                            // Google's official button draws a 4pt inset border/shadow on every side.
-                            // Add 8pt to its container so the visible white background matches Apple's width.
-                            .frame(width: buttonWidth + 8, height: 48)
+                            // The official Google view has a 4pt visual inset.
+                            // Its 320pt container therefore produces a centered 312pt visible button.
+                            .frame(width: buttonWidth + 8, height: 48, alignment: .center)
+                            .frame(maxWidth: .infinity, alignment: .center)
 
                         SignInWithAppleButton(
                             .signIn,
@@ -42,13 +43,11 @@ struct ContentView: View {
                             onCompletion: handleAppleSignIn
                         )
                         .signInWithAppleButtonStyle(.black)
-                        // Match the Google SDK's visible 40pt button face.
                         .frame(width: buttonWidth, height: 40)
                         .cornerRadius(2)
-                        // Keep the same 48pt layout slot so spacing remains aligned.
-                        .frame(width: buttonWidth, height: 48)
+                        .frame(width: buttonWidth, height: 48, alignment: .center)
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, geometry.size.height * 0.17)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -194,21 +193,37 @@ private extension UIApplication {
 private struct OfficialGoogleSignInButton: UIViewRepresentable {
     let action: () -> Void
 
-    func makeUIView(context: Context) -> GIDSignInButton {
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .clear
+
         let button = GIDSignInButton()
         button.style = .wide
         button.colorScheme = .light
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(
             context.coordinator,
             action: #selector(Coordinator.didTap),
             for: .touchUpInside
         )
-        return button
+
+        container.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            button.centerYAnchor.constraint(equalTo: container.centerYAnchor),
+            button.widthAnchor.constraint(equalTo: container.widthAnchor),
+            button.heightAnchor.constraint(equalToConstant: 48)
+        ])
+
+        return container
     }
 
-    func updateUIView(_ uiView: GIDSignInButton, context: Context) {
-        uiView.style = .wide
-        uiView.colorScheme = .light
+    func updateUIView(_ uiView: UIView, context: Context) {
+        guard let button = uiView.subviews.first(where: { $0 is GIDSignInButton }) as? GIDSignInButton else {
+            return
+        }
+        button.style = .wide
+        button.colorScheme = .light
     }
 
     func makeCoordinator() -> Coordinator {
