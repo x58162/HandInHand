@@ -182,7 +182,7 @@ final class VoiceRoomSessionStore: ObservableObject,
         guard !micRequestPending, !isStartingMicrophone else { return }
 
         micRequestPending = true
-        pendingMicStart = true
+        pendingMicStart = false
 
         var payload: [String: Any] = ["type": "request_mic"]
         if let seatIndex { payload["seatIndex"] = seatIndex }
