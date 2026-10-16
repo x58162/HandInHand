@@ -221,35 +221,7 @@ struct VoiceRoomDetailView: View {
                         }
 
                         ForEach(store.chatMessages) { message in
-                            HStack(alignment: .top, spacing: 8) {
-                                Text(message.userName)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(message.userId == currentUserId ? Palette.rose : Palette.violet)
-                                    .lineLimit(1)
-                                    .frame(maxWidth: 82, alignment: .leading)
-
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(message.text)
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(Palette.ink)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    Text(message.timestamp.formatted(date: .omitted, time: .shortened))
-                                        .font(.system(size: 9))
-                                        .foregroundStyle(Palette.muted)
-                                }
-
-                                Spacer(minLength: 0)
-                            }
-                            .padding(.horizontal, 9)
-                            .padding(.vertical, 7)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(
-                                message.userId == currentUserId
-                                    ? Palette.violet.opacity(0.07)
-                                    : Palette.background,
-                                in: RoundedRectangle(cornerRadius: 10)
-                            )
-                            .id(message.id)
+                            chatMessageRow(message)
                         }
                     }
                     .padding(.vertical, 2)
@@ -271,6 +243,39 @@ struct VoiceRoomDetailView: View {
         .padding(13)
         .background(.white, in: RoundedRectangle(cornerRadius: 18))
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line, lineWidth: 1))
+    }
+
+    private func chatMessageRow(_ message: VoiceRoomChatMessage) -> some View {
+        let isOwnMessage = message.userId == currentUserId
+        let nameColor: Color = isOwnMessage ? Palette.rose : Palette.violet
+        let bubbleColor: Color = isOwnMessage ? Palette.violet.opacity(0.07) : Palette.background
+        let timeText = message.timestamp.formatted(date: .omitted, time: .shortened)
+
+        return HStack(alignment: .top, spacing: 8) {
+            Text(message.userName)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(nameColor)
+                .lineLimit(1)
+                .frame(maxWidth: 82, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(message.text)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Palette.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(timeText)
+                    .font(.system(size: 9))
+                    .foregroundStyle(Palette.muted)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(bubbleColor, in: RoundedRectangle(cornerRadius: 10))
+        .id(message.id)
     }
 
     private func seatItem(at index: Int) -> some View {
@@ -569,6 +574,7 @@ struct VoiceRoomDetailView: View {
 }
 
 private struct Palette {
+    static let background = Color(red: 0.975, green: 0.965, blue: 0.99)
     static let ink = Color(red: 0.16, green: 0.13, blue: 0.23)
     static let muted = Color(red: 0.49, green: 0.46, blue: 0.56)
     static let violet = Color(red: 0.48, green: 0.31, blue: 0.82)
