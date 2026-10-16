@@ -156,8 +156,11 @@ struct VoiceRoom: Decodable, Identifiable {
             }
 
             guard let url else { continue }
-            // SwiftUI AsyncImage doesn't decode SVG. Use the styled fallback for SVG defaults.
-            if url.pathExtension.lowercased() == "svg" { continue }
+            // SwiftUI AsyncImage doesn't decode SVG. The server update includes
+            // matching PNG copies for the default male/female avatars.
+            if url.pathExtension.lowercased() == "svg" {
+                return url.deletingPathExtension().appendingPathExtension("png")
+            }
             return url
         }
         return nil
