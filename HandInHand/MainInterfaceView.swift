@@ -172,8 +172,14 @@ struct MainInterfaceView: View {
                 if roomStore.rooms.isEmpty {
                     emptyRoomsCard
                 } else {
-                    ForEach(Array(roomStore.rooms.prefix(3))) { room in
-                        roomCard(room)
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+                        alignment: .leading,
+                        spacing: 12
+                    ) {
+                        ForEach(Array(roomStore.rooms.prefix(4))) { room in
+                            roomCard(room)
+                        }
                     }
                 }
             }
@@ -287,8 +293,14 @@ struct MainInterfaceView: View {
             if roomStore.rooms.isEmpty {
                 emptyRoomsCard
             } else {
-                ForEach(roomStore.rooms) { room in
-                    roomCard(room)
+                LazyVGrid(
+                    columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)],
+                    alignment: .leading,
+                    spacing: 12
+                ) {
+                    ForEach(roomStore.rooms) { room in
+                        roomCard(room)
+                    }
                 }
             }
 
@@ -557,7 +569,7 @@ struct MainInterfaceView: View {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack(alignment: .bottomLeading) {
                     roomCover(room)
-                        .frame(height: 148)
+                        .frame(height: 118)
                         .frame(maxWidth: .infinity)
                         .clipped()
 
