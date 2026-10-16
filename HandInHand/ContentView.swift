@@ -11,6 +11,23 @@ struct ContentView: View {
     private let brandPink = Color(red: 1.0, green: 0.77, blue: 0.97)
 
     var body: some View {
+        Group {
+            if let signedInUser {
+                MainInterfaceView(user: signedInUser) {
+                    self.signedInUser = nil
+                }
+            } else {
+                loginScreen
+            }
+        }
+        .alert(loginMessageTitle, isPresented: $showingLoginMessage) {
+            Button("知道了", role: .cancel) { }
+        } message: {
+            Text(loginMessage)
+        }
+    }
+
+    private var loginScreen: some View {
         GeometryReader { geometry in
             ZStack {
                 Image("HandsArtwork")
@@ -30,11 +47,9 @@ struct ContentView: View {
 
                     VStack(alignment: .leading, spacing: 12) {
                         OfficialGoogleSignInButton(action: handleGoogleSignIn)
-                            // Google's official button has a 4pt visual inset on every side.
                             .frame(width: buttonWidth + 8, height: 48)
 
                         OfficialAppleSignInButton(completion: handleAppleSignIn)
-                            // Align Apple's visible left edge with Google's visible left edge (+4pt inset).
                             .frame(width: buttonWidth, height: 40)
                             .padding(.leading, 4)
                             .frame(width: buttonWidth + 8, height: 48, alignment: .leading)
@@ -48,11 +63,6 @@ struct ContentView: View {
         }
         .ignoresSafeArea(edges: .bottom)
         .environment(\.locale, Locale(identifier: "zh_TW"))
-        .alert(loginMessageTitle, isPresented: $showingLoginMessage) {
-            Button("知道了", role: .cancel) { }
-        } message: {
-            Text(loginMessage)
-        }
     }
 
     private var brandHeader: some View {
@@ -128,18 +138,28 @@ struct ContentView: View {
                 return
             }
 
-            let email = result.user.profile?.email ?? "Google 帳號"
-            showLoginMessage(
-                title: "Google 身分驗證成功",
-                message: "已驗證：\(email)。牽手帳號伺服器的登入／建立帳號流程尚待串接。"
-            )
+            let profile = result.user.profile
+            let email = profile?.email ?? ""
+            let displayName = profile?.name
+                ?? email.components(separatedBy: "@").first
+                ?? "Google 使用者"
+
+            // Show the next app screen after Google returns a successful identity result.
+            // The membership backend is not connected yet, so this remains preview mode.
+            DispatchQueue.main.async {
+                self.signedInUser = SignedInUser(
+                    displayName: displayName,
+                    email: email,
+                    provider: "Google"
+                )
+            }
         }
     }
 
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
-            guard authorization.credential is ASAuthorizationAppleIDCredential else {
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
                 showLoginMessage(
                     title: "Apple 登入未完成",
                     message: "Apple 沒有傳回有效的登入憑證，請再試一次。"
@@ -147,10 +167,28 @@ struct ContentView: View {
                 return
             }
 
-            showLoginMessage(
-                title: "Apple 身分驗證成功",
-                message: "Apple 已完成身分驗證。牽手帳號伺服器的登入／建立帳號流程尚待串接。"
-            )
+            let email = credential.email ?? ""
+            let returnedName = credential.fullName
+                .map { PersonNameComponentsFormatter().string(from: $0) }
+                ?? ""
+            let displayName: String
+            if !returnedName.isEmpty {
+                displayName = returnedName
+            } else if let emailName = email.components(separatedBy: "@").first, !emailName.isEmpty {
+                displayName = emailName
+            } else {
+                displayName = "Apple 使用者"
+            }
+
+            // Apple may only return the name/email on the first authorization.
+            // Continue into preview mode on a successful native authorization.
+            DispatchQueue.main.async {
+                self.signedInUser = SignedInUser(
+                    displayName: displayName,
+                    email: email,
+                    provider: "Apple"
+                )
+            }
 
         case .failure(let error):
             if let authorizationError = error as? ASAuthorizationError,
