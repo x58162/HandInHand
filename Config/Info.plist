@@ -22,6 +22,8 @@
     <string>303049338763-2pss1o5eemfqt18ru04bg2tp21hrpqke.apps.googleusercontent.com</string>
     <key>GIDServerClientID</key>
     <string>303049338763-lt886fuivdl2tqvvignanl15n2qvtc9g.apps.googleusercontent.com</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>牽手需要使用麥克風，讓你在語音房中開麥聊天。</string>
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIApplicationSceneManifest</key>
