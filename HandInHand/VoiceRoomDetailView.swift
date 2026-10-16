@@ -511,7 +511,6 @@ struct VoiceRoomDetailView: View {
         guard !chatDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         if store.sendChatMessage(chatDraft) {
             chatDraft = ""
-            isChatInputFocused = false
         }
     }
 
