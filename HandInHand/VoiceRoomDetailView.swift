@@ -8,6 +8,8 @@ struct VoiceRoomDetailView: View {
 
     @StateObject private var store: VoiceRoomSessionStore
     @Environment(\.dismiss) private var dismiss
+    @State private var chatDraft = ""
+    @FocusState private var isChatInputFocused: Bool
 
     init(
         room: VoiceRoom,
@@ -38,8 +40,8 @@ struct VoiceRoomDetailView: View {
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 18) {
-                        roomBanner
                         seatsPanel
+                        roomChatPanel
 
                         if isRoomManager, let snapshot = store.snapshot,
                            !snapshot.pendingMicRequests.isEmpty {
@@ -147,60 +149,6 @@ struct VoiceRoomDetailView: View {
         }
     }
 
-    private var roomBanner: some View {
-        ZStack(alignment: .bottomLeading) {
-            Group {
-                if let url = room.displayImageURL {
-                    AsyncImage(url: url) { phase in
-                        if let image = phase.image {
-                            image.resizable().scaledToFill()
-                        } else {
-                            bannerFallback
-                        }
-                    }
-                } else {
-                    bannerFallback
-                }
-            }
-            .frame(height: 126)
-            .frame(maxWidth: .infinity)
-            .clipped()
-
-            LinearGradient(colors: [.clear, .black.opacity(0.72)], startPoint: .center, endPoint: .bottom)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Image(systemName: "waveform")
-                    Text(room.mode == "personal" ? "個人語音房" : "多人語音房")
-                }
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(.white.opacity(0.92))
-
-                Text("房主：\(store.snapshot?.ownerName ?? room.ownerName)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-            .padding(15)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.7), lineWidth: 1))
-    }
-
-    private var bannerFallback: some View {
-        ZStack {
-            Image("HandsArtwork").resizable().scaledToFill()
-            LinearGradient(
-                colors: [Palette.violet.opacity(0.20), Palette.rose.opacity(0.70)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            Image(systemName: "waveform")
-                .font(.system(size: 38, weight: .semibold))
-                .foregroundStyle(.white)
-        }
-        .clipped()
-    }
-
     private var seatsPanel: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -245,6 +193,84 @@ struct VoiceRoomDetailView: View {
         .background(.white, in: RoundedRectangle(cornerRadius: 20))
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line, lineWidth: 1))
         .shadow(color: Palette.violet.opacity(0.04), radius: 12, y: 4)
+    }
+
+    private var roomChatPanel: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "bubble.left.and.bubble.right.fill")
+                    .foregroundStyle(Palette.violet)
+                Text("房間聊天")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundStyle(Palette.ink)
+                Spacer()
+                Text("\(store.chatMessages.count) 則")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Palette.muted)
+            }
+
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(alignment: .leading, spacing: 7) {
+                        if store.chatMessages.isEmpty {
+                            Text(store.isJoined ? "傳送第一則訊息，和房內的人打聲招呼吧。" : "連線後即可開始聊天。")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Palette.muted)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 9)
+                        }
+
+                        ForEach(store.chatMessages) { message in
+                            HStack(alignment: .top, spacing: 8) {
+                                Text(message.userName)
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(message.userId == currentUserId ? Palette.rose : Palette.violet)
+                                    .lineLimit(1)
+                                    .frame(maxWidth: 82, alignment: .leading)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(message.text)
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Palette.ink)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Text(message.timestamp.formatted(date: .omitted, time: .shortened))
+                                        .font(.system(size: 9))
+                                        .foregroundStyle(Palette.muted)
+                                }
+
+                                Spacer(minLength: 0)
+                            }
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 7)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                message.userId == currentUserId
+                                    ? Palette.violet.opacity(0.07)
+                                    : Palette.background,
+                                in: RoundedRectangle(cornerRadius: 10)
+                            )
+                            .id(message.id)
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+                .frame(height: 118)
+                .onChange(of: store.chatMessages.count) { _ in
+                    guard let lastMessage = store.chatMessages.last else { return }
+                    withAnimation(.easeOut(duration: 0.16)) {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
+                .onAppear {
+                    if let lastMessage = store.chatMessages.last {
+                        proxy.scrollTo(lastMessage.id, anchor: .bottom)
+                    }
+                }
+            }
+        }
+        .padding(13)
+        .background(.white, in: RoundedRectangle(cornerRadius: 18))
+        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line, lineWidth: 1))
     }
 
     private func seatItem(at index: Int) -> some View {
@@ -407,6 +433,8 @@ struct VoiceRoomDetailView: View {
                 }
             }
 
+            chatComposer
+
             HStack(spacing: 10) {
                 Button {
                     if isCurrentUserOnMic {
@@ -445,6 +473,46 @@ struct VoiceRoomDetailView: View {
         .padding(.bottom, 12)
         .background(.ultraThinMaterial)
         .overlay(alignment: .top) { Rectangle().fill(Palette.line).frame(height: 1) }
+    }
+
+    private var chatComposer: some View {
+        HStack(spacing: 9) {
+            Image(systemName: "bubble.left.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Palette.violet)
+
+            TextField("聊聊…", text: $chatDraft)
+                .font(.system(size: 13))
+                .foregroundStyle(Palette.ink)
+                .textInputAutocapitalization(.sentences)
+                .autocorrectionDisabled(false)
+                .submitLabel(.send)
+                .focused($isChatInputFocused)
+                .onSubmit(sendChatDraft)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 11)
+                .background(Palette.background, in: Capsule())
+
+            Button(action: sendChatDraft) {
+                Image(systemName: "paperplane.fill")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Palette.violet, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!store.isJoined || chatDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .opacity(!store.isJoined || chatDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.45 : 1)
+            .accessibilityLabel("送出聊天訊息")
+        }
+    }
+
+    private func sendChatDraft() {
+        guard !chatDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        if store.sendChatMessage(chatDraft) {
+            chatDraft = ""
+            isChatInputFocused = false
+        }
     }
 
     private var microphoneButtonTitle: String {
