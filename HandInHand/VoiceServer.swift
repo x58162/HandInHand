@@ -76,6 +76,16 @@ final class VoiceServerAPIClient {
         return try JSONDecoder().decode(GoogleVerifyResponse.self, from: data)
     }
 
+    func verifyApple(identityToken: String) async throws -> GoogleVerifyResponse {
+        var request = URLRequest(url: URL(string: "/auth/apple/verify", relativeTo: VoiceServerAPI.baseURL)!.absoluteURL)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["identityToken": identityToken])
+
+        let data = try await send(request)
+        return try JSONDecoder().decode(GoogleVerifyResponse.self, from: data)
+    }
+
     func completeProfile(
         sessionToken: String,
         nickname: String,
