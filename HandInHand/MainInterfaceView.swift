@@ -24,24 +24,6 @@ private enum MainTab: String, CaseIterable, Identifiable {
     }
 }
 
-private struct DemoVoiceRoom: Identifiable {
-    let id: Int
-    let title: String
-    let host: String
-    let topic: String
-    let listeners: Int
-    let symbol: String
-    let tint: Color
-    let isHot: Bool
-
-    static let samples: [DemoVoiceRoom] = [
-        DemoVoiceRoom(id: 1, title: "今晚不想一個人", host: "小星球", topic: "深夜聊天", listeners: 28, symbol: "moon.stars.fill", tint: Palette.violet, isHot: true),
-        DemoVoiceRoom(id: 2, title: "放首歌陪你", host: "阿沐", topic: "音樂・點歌", listeners: 16, symbol: "music.note", tint: Palette.rose, isHot: true),
-        DemoVoiceRoom(id: 3, title: "慢慢認識新朋友", host: "晴天", topic: "交朋友", listeners: 9, symbol: "heart.fill", tint: Palette.mint, isHot: false),
-        DemoVoiceRoom(id: 4, title: "下班後的放鬆角落", host: "小宇", topic: "生活・閒聊", listeners: 12, symbol: "cup.and.saucer.fill", tint: Palette.amber, isHot: false)
-    ]
-}
-
 private enum Palette {
     static let background = Color(red: 0.975, green: 0.965, blue: 0.99)
     static let ink = Color(red: 0.16, green: 0.13, blue: 0.23)
@@ -55,10 +37,13 @@ private enum Palette {
 
 struct MainInterfaceView: View {
     let user: SignedInUser
+    let sessionToken: String
+    let userId: String
     let onLogout: () -> Void
 
+    @StateObject private var roomStore = VoiceRoomStore()
     @State private var selectedTab: MainTab = .home
-    @State private var selectedRoom: DemoVoiceRoom?
+    @State private var selectedRoom: VoiceRoom?
 
     var body: some View {
         ZStack {
@@ -74,6 +59,9 @@ struct MainInterfaceView: View {
 
                 bottomBar
             }
+        }
+        .onAppear {
+            roomStore.connect()
         }
         .sheet(item: $selectedRoom) { room in
             RoomPreviewSheet(room: room)
@@ -172,15 +160,21 @@ struct MainInterfaceView: View {
 
             VStack(alignment: .leading, spacing: 13) {
                 HStack {
-                    sectionHeading("正在熱聊", detail: "看看大家都在聊什麼")
+                    sectionHeading("正在開放的語音房", detail: "即時同步伺服器房間")
                     Spacer()
                     Button("全部") { selectedTab = .discover }
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Palette.violet)
                 }
 
-                ForEach(DemoVoiceRoom.samples.prefix(3)) { room in
-                    roomCard(room)
+                roomConnectionStatus
+
+                if roomStore.rooms.isEmpty {
+                    emptyRoomsCard
+                } else {
+                    ForEach(Array(roomStore.rooms.prefix(3))) { room in
+                        roomCard(room)
+                    }
                 }
             }
 
@@ -192,7 +186,7 @@ struct MainInterfaceView: View {
                     Text("第一次來牽手？")
                         .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Palette.ink)
-                    Text("逛逛語音房，找到合拍的聊天夥伴。")
+                    Text("看看目前開放的語音房，選擇有興趣的話題。")
                         .font(.system(size: 12))
                         .foregroundStyle(Palette.muted)
                 }
@@ -262,24 +256,148 @@ struct MainInterfaceView: View {
                 Text("探索語音房")
                     .font(.system(size: 25, weight: .bold, design: .rounded))
                     .foregroundStyle(Palette.ink)
-                Text("依照你的心情，選一間房間加入聊天。")
+                Text("房間名稱、人數及房主資料同步自牽手伺服器。")
                     .font(.system(size: 14))
                     .foregroundStyle(Palette.muted)
             }
             .padding(.top, 8)
 
+            roomConnectionStatus
+
             HStack(spacing: 8) {
                 topicChip("全部房間", symbol: "square.grid.2x2.fill", color: Palette.violet)
-                topicChip("熱門", symbol: "flame.fill", color: Palette.rose)
+                Button {
+                    roomStore.refresh()
+                } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("重新整理")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Palette.rose)
+                    .padding(.horizontal, 13)
+                    .padding(.vertical, 13)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.rose.opacity(0.18), lineWidth: 1))
+                }
+                .buttonStyle(.plain)
             }
 
-            ForEach(DemoVoiceRoom.samples) { room in
-                roomCard(room)
+            if roomStore.rooms.isEmpty {
+                emptyRoomsCard
+            } else {
+                ForEach(roomStore.rooms) { room in
+                    roomCard(room)
+                }
             }
 
-            demoNotice
+            Text("房間列表只顯示目前伺服器上正在開放的房間。")
+                .font(.system(size: 12))
+                .foregroundStyle(Palette.muted)
+                .padding(.top, 2)
         }
         .padding(.horizontal, 20)
+    }
+
+    private var roomConnectionStatus: some View {
+        HStack(spacing: 8) {
+            switch roomStore.connectionState {
+            case .connecting:
+                ProgressView().controlSize(.small)
+                Text("正在連接牽手語音伺服器…")
+                    .foregroundStyle(Palette.muted)
+            case .connected:
+                Circle().fill(Palette.mint).frame(width: 7, height: 7)
+                Text("已連線・\(roomStore.rooms.count) 間開放房間")
+                    .foregroundStyle(Palette.muted)
+            case .failed(let message):
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(Palette.rose)
+                Text("連線失敗：\(message)")
+                    .foregroundStyle(Palette.rose)
+                    .lineLimit(2)
+            case .disconnected:
+                Image(systemName: "wifi.slash")
+                    .foregroundStyle(Palette.muted)
+                Text("尚未連線")
+                    .foregroundStyle(Palette.muted)
+            }
+
+            Spacer(minLength: 0)
+            Button {
+                roomStore.refresh()
+            } label: {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Palette.violet)
+                    .padding(8)
+                    .background(Palette.violet.opacity(0.08), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("重新整理房間")
+        }
+        .font(.system(size: 11, weight: .medium))
+        .padding(.vertical, 3)
+    }
+
+    private var emptyRoomsCard: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle().fill(Palette.violet.opacity(0.09)).frame(width: 66, height: 66)
+                Image(systemName: "waveform")
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(Palette.violet)
+            }
+
+            Text(emptyRoomTitle)
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Palette.ink)
+
+            Text(emptyRoomDetail)
+                .font(.system(size: 12))
+                .foregroundStyle(Palette.muted)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Button {
+                roomStore.refresh()
+            } label: {
+                Text("重新載入")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Palette.violet)
+                    .padding(.horizontal, 15)
+                    .padding(.vertical, 9)
+                    .background(Palette.violet.opacity(0.09), in: Capsule())
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(24)
+        .background(.white, in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line, lineWidth: 1))
+    }
+
+    private var emptyRoomTitle: String {
+        switch roomStore.connectionState {
+        case .connecting: return "正在尋找語音房"
+        case .failed: return "暫時無法取得房間"
+        case .connected: return "目前沒有正在開放的房間"
+        case .disconnected: return "尚未連接語音伺服器"
+        }
+    }
+
+    private var emptyRoomDetail: String {
+        switch roomStore.connectionState {
+        case .connecting:
+            return "正在向牽手伺服器讀取即時房間列表。"
+        case .failed(let message):
+            return "請確認伺服器網址與網路連線。\n\(message)"
+        case .connected:
+            return "目前沒有人開啟語音房，稍後可以再回來看看。"
+        case .disconnected:
+            return "請重新連線後再查看房間。"
+        }
     }
 
     private var messagesPage: some View {
@@ -294,14 +412,12 @@ struct MainInterfaceView: View {
                 .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(Palette.ink)
 
-            Text("登入介面已建立，聊天訊息功能會在接上會員伺服器後啟用。")
+            Text("訊息功能會在接上牽手即時聊天服務後啟用。")
                 .font(.system(size: 14))
                 .multilineTextAlignment(.center)
                 .foregroundStyle(Palette.muted)
                 .lineSpacing(4)
                 .frame(maxWidth: 280)
-
-            demoNotice
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 24)
@@ -330,7 +446,7 @@ struct MainInterfaceView: View {
                         .font(.system(size: 12))
                         .foregroundStyle(Palette.muted)
                         .lineLimit(2)
-                    Text("\(user.provider) 驗證")
+                    Text("\(user.provider) 會員")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(Palette.violet)
                         .padding(.horizontal, 9)
@@ -356,13 +472,11 @@ struct MainInterfaceView: View {
             .background(.white, in: RoundedRectangle(cornerRadius: 20))
             .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line, lineWidth: 1))
 
-            demoNotice
-
             Button(role: .destructive, action: onLogout) {
                 HStack {
                     Spacer()
                     Image(systemName: "rectangle.portrait.and.arrow.right")
-                    Text("返回登入畫面")
+                    Text("登出牽手")
                     Spacer()
                 }
                 .font(.system(size: 15, weight: .semibold))
@@ -373,20 +487,6 @@ struct MainInterfaceView: View {
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
-    }
-
-    private var demoNotice: some View {
-        HStack(alignment: .top, spacing: 9) {
-            Image(systemName: "info.circle.fill")
-                .foregroundStyle(Palette.violet)
-            Text("目前是介面預覽模式。牽手會員伺服器、即時房間資料與聊天功能尚未串接。")
-                .font(.system(size: 12))
-                .foregroundStyle(Palette.muted)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(13)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Palette.violet.opacity(0.07), in: RoundedRectangle(cornerRadius: 15))
     }
 
     private var bottomBar: some View {
@@ -414,9 +514,7 @@ struct MainInterfaceView: View {
         }
         .background(.white)
         .overlay(alignment: .top) {
-            Rectangle()
-                .fill(Palette.line)
-                .frame(height: 1)
+            Rectangle().fill(Palette.line).frame(height: 1)
         }
     }
 
@@ -452,58 +550,117 @@ struct MainInterfaceView: View {
         .buttonStyle(.plain)
     }
 
-    private func roomCard(_ room: DemoVoiceRoom) -> some View {
+    private func roomCard(_ room: VoiceRoom) -> some View {
         Button {
             selectedRoom = room
         } label: {
-            HStack(spacing: 13) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 17)
-                        .fill(room.tint.opacity(0.13))
-                        .frame(width: 62, height: 62)
-                    Image(systemName: room.symbol)
-                        .font(.system(size: 25, weight: .semibold))
-                        .foregroundStyle(room.tint)
-                }
+            VStack(alignment: .leading, spacing: 0) {
+                ZStack(alignment: .bottomLeading) {
+                    roomCover(room)
+                        .frame(height: 148)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
 
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack(spacing: 6) {
-                        Text(room.title)
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(Palette.ink)
-                            .lineLimit(1)
-                        if room.isHot {
-                            Text("熱門")
+                    LinearGradient(
+                        colors: [.clear, .black.opacity(0.72)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+
+                    VStack(alignment: .leading, spacing: 5) {
+                        HStack(spacing: 6) {
+                            Text(room.mode == "personal" ? "個人房" : "語音房")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(Palette.rose)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 3)
-                                .background(Palette.rose.opacity(0.10), in: Capsule())
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(.white.opacity(0.22), in: Capsule())
+
+                            if room.locked {
+                                Label("已鎖定", systemImage: "lock.fill")
+                                    .font(.system(size: 9, weight: .semibold))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(.black.opacity(0.35), in: Capsule())
+                            }
+                            Spacer()
                         }
+
+                        Text(room.name)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .lineLimit(1)
+                            .foregroundStyle(.white)
+
+                        Text("房主・\(room.ownerName)")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.90))
+                            .lineLimit(1)
                     }
-                    Text("\(room.host)  ・  \(room.topic)")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Palette.muted)
-                        .lineLimit(1)
-                    HStack(spacing: 4) {
-                        Circle().fill(Palette.mint).frame(width: 5, height: 5)
-                        Text("\(room.listeners) 人正在聽")
-                            .font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(Palette.muted)
-                    }
+                    .padding(14)
+                    .foregroundStyle(.white)
                 }
+                .clipShape(UnevenRoundedRectangle(topLeadingRadius: 18, topTrailingRadius: 18))
 
-                Spacer(minLength: 0)
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Palette.muted.opacity(0.7))
+                HStack(spacing: 13) {
+                    Label("\(room.userCount) 人", systemImage: "person.2.fill")
+                    Label("\(room.micCount)/8 麥", systemImage: "mic.fill")
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(Palette.muted)
+                }
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Palette.muted)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .background(.white)
             }
-            .padding(12)
-            .background(.white, in: RoundedRectangle(cornerRadius: 20))
-            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.line, lineWidth: 1))
+            .background(.white, in: RoundedRectangle(cornerRadius: 18))
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.line, lineWidth: 1))
+            .shadow(color: Palette.violet.opacity(0.05), radius: 12, y: 5)
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private func roomCover(_ room: VoiceRoom) -> some View {
+        if let url = room.displayImageURL {
+            AsyncImage(url: url) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    fallbackRoomArtwork(room)
+                }
+            }
+        } else {
+            fallbackRoomArtwork(room)
+        }
+    }
+
+    private func fallbackRoomArtwork(_ room: VoiceRoom) -> some View {
+        ZStack {
+            LinearGradient(
+                colors: [Palette.violet, Color(red: 0.26, green: 0.18, blue: 0.42), Palette.rose.opacity(0.85)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            Circle()
+                .fill(.white.opacity(0.11))
+                .frame(width: 150, height: 150)
+                .offset(x: 105, y: -45)
+
+            Circle()
+                .stroke(.white.opacity(0.18), lineWidth: 1)
+                .frame(width: 95, height: 95)
+                .offset(x: -100, y: 42)
+
+            Image(systemName: room.mode == "personal" ? "person.crop.circle.fill" : "waveform")
+                .font(.system(size: 38, weight: .medium))
+                .foregroundStyle(.white.opacity(0.88))
+        }
     }
 
     private var userInitial: String {
@@ -519,35 +676,54 @@ struct MainInterfaceView: View {
 }
 
 private struct RoomPreviewSheet: View {
-    let room: DemoVoiceRoom
+    let room: VoiceRoom
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
             Palette.background.ignoresSafeArea()
-            VStack(spacing: 18) {
-                ZStack {
-                    Circle().fill(room.tint.opacity(0.12)).frame(width: 105, height: 105)
-                    Image(systemName: room.symbol)
-                        .font(.system(size: 40, weight: .semibold))
-                        .foregroundStyle(room.tint)
-                }
 
-                Text(room.title)
+            VStack(spacing: 16) {
+                Group {
+                    if let url = room.displayImageURL {
+                        AsyncImage(url: url) { phase in
+                            if let image = phase.image {
+                                image.resizable().scaledToFill()
+                            } else {
+                                placeholderImage
+                            }
+                        }
+                    } else {
+                        placeholderImage
+                    }
+                }
+                .frame(width: 108, height: 108)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
+
+                Text(room.name)
                     .font(.system(size: 23, weight: .bold, design: .rounded))
                     .foregroundStyle(Palette.ink)
 
-                Text("\(room.host)  ・  \(room.topic)")
+                Text("房主：\(room.ownerName)")
                     .font(.system(size: 14))
                     .foregroundStyle(Palette.muted)
 
-                Label("\(room.listeners) 人正在聽", systemImage: "headphones")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Palette.violet)
+                HStack(spacing: 16) {
+                    Label("\(room.userCount) 人在線", systemImage: "person.2.fill")
+                    Label("\(room.micCount)/8 麥", systemImage: "mic.fill")
+                }
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(Palette.violet)
 
-                Text("語音房介面預覽")
+                Text(room.locked ? "這間房目前已上鎖。" : "房間資料來自牽手伺服器。")
                     .font(.system(size: 12))
                     .foregroundStyle(Palette.muted)
+
+                Text("目前先完成真實房間列表與圖片顯示；加入房間與即時語音會接著串接。")
+                    .font(.system(size: 12))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Button {
                     dismiss()
@@ -562,6 +738,15 @@ private struct RoomPreviewSheet: View {
                 .buttonStyle(.plain)
             }
             .padding(28)
+        }
+    }
+
+    private var placeholderImage: some View {
+        ZStack {
+            LinearGradient(colors: [Palette.violet, Palette.rose], startPoint: .topLeading, endPoint: .bottomTrailing)
+            Image(systemName: "waveform")
+                .font(.system(size: 35, weight: .semibold))
+                .foregroundStyle(.white)
         }
     }
 }
