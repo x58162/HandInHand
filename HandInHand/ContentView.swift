@@ -61,6 +61,12 @@ struct ContentView: View {
             return
         }
 
+        let serverClientID = Bundle.main.object(forInfoDictionaryKey: "GIDServerClientID") as? String
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(
+            clientID: clientID,
+            serverClientID: serverClientID
+        )
+
         guard let presentingViewController = UIApplication.shared.rootViewController else {
             showLoginMessage(
                 title: "無法開啟 Google 登入",
@@ -123,10 +129,11 @@ struct ContentView: View {
 
 private extension UIApplication {
     var rootViewController: UIViewController? {
-        connectedScenes
+        let activeWindowScene = connectedScenes
             .compactMap { $0 as? UIWindowScene }
-            .first { $0.activationState == .foregroundActive }?
-            .windows
+            .first { $0.activationState == .foregroundActive }
+
+        return activeWindowScene?.windows
             .first { $0.isKeyWindow }?
             .rootViewController
     }
