@@ -2,7 +2,6 @@ import SwiftUI
 import UIKit
 import AuthenticationServices
 import GoogleSignIn
-import GoogleSignInSwift
 
 struct ContentView: View {
     @State private var showingLoginMessage = false
@@ -27,14 +26,11 @@ struct ContentView: View {
 
                     Spacer(minLength: 12)
 
+                    let buttonWidth = min(geometry.size.width - 60, 312)
+
                     VStack(spacing: 12) {
-                        GoogleSignInButton(
-                            scheme: .light,
-                            style: .wide,
-                            action: handleGoogleSignIn
-                        )
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+                        OfficialGoogleSignInButton(action: handleGoogleSignIn)
+                            .frame(width: buttonWidth, height: 48)
 
                         SignInWithAppleButton(
                             .signIn,
@@ -44,11 +40,9 @@ struct ContentView: View {
                             onCompletion: handleAppleSignIn
                         )
                         .signInWithAppleButtonStyle(.black)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
+                        .frame(width: buttonWidth, height: 48)
                         .cornerRadius(2)
                     }
-                    .frame(maxWidth: 340)
                     .frame(maxWidth: .infinity)
                     .padding(.bottom, geometry.size.height * 0.17)
                 }
@@ -188,6 +182,44 @@ private extension UIApplication {
         return activeWindowScene?.windows
             .first { $0.isKeyWindow }?
             .rootViewController
+    }
+}
+
+
+private struct OfficialGoogleSignInButton: UIViewRepresentable {
+    let action: () -> Void
+
+    func makeUIView(context: Context) -> GIDSignInButton {
+        let button = GIDSignInButton()
+        button.style = .wide
+        button.colorScheme = .light
+        button.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.didTap),
+            for: .touchUpInside
+        )
+        return button
+    }
+
+    func updateUIView(_ uiView: GIDSignInButton, context: Context) {
+        uiView.style = .wide
+        uiView.colorScheme = .light
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(action: action)
+    }
+
+    final class Coordinator: NSObject {
+        private let action: () -> Void
+
+        init(action: @escaping () -> Void) {
+            self.action = action
+        }
+
+        @objc func didTap() {
+            action()
+        }
     }
 }
 
