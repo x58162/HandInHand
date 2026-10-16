@@ -296,7 +296,4 @@ final class VoiceRoomStore: ObservableObject {
         task.cancel(with: .goingAway, reason: nil)
     }
 
-    deinit {
-        socket?.cancel(with: .goingAway, reason: nil)
-    }
 }
