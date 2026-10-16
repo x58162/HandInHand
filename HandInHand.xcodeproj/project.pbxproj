@@ -17,6 +17,10 @@
 		A10000000000000000000005 /* HandInHandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* HandInHandApp.swift */; };
 		A10000000000000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Assets.xcassets */; };
 
+
+		A10000000000000000000007 /* VoiceRoomSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* VoiceRoomSession.swift */; };
+		A10000000000000000000008 /* VoiceRoomDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* VoiceRoomDetailView.swift */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +32,10 @@
 		A20000000000000000000004 /* ProfileSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSetupView.swift; sourceTree = "<group>"; };
 		A20000000000000000000005 /* HandInHandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HandInHandApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+
+
+		A20000000000000000000007 /* VoiceRoomSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceRoomSession.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* VoiceRoomDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceRoomDetailView.swift; sourceTree = "<group>"; };
 
 /* End PBXFileReference section */
 
@@ -54,6 +62,8 @@
 				A20000000000000000000004 /* ProfileSetupView.swift */,
 				A20000000000000000000005 /* HandInHandApp.swift */,
 				A20000000000000000000006 /* Assets.xcassets */,
+				A20000000000000000000007 /* VoiceRoomSession.swift */,
+				A20000000000000000000008 /* VoiceRoomDetailView.swift */,
 			);
 			path = HandInHand;
 			sourceTree = "<group>";
@@ -163,6 +173,8 @@
 				A10000000000000000000003 /* VoiceServer.swift in Sources */,
 				A10000000000000000000004 /* ProfileSetupView.swift in Sources */,
 				A10000000000000000000005 /* HandInHandApp.swift in Sources */,
+				A10000000000000000000007 /* VoiceRoomSession.swift in Sources */,
+				A10000000000000000000008 /* VoiceRoomDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
