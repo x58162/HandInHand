@@ -244,8 +244,15 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
         let container = UIView()
         container.backgroundColor = .clear
 
-        let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
-        button.cornerRadius = 2
+        // Keep Apple's native authorization flow, while aligning the visual label
+        // with Google's left-aligned icon/text layout.
+        let button = UIButton(type: .system)
+        button.backgroundColor = .black
+        button.layer.cornerRadius = 2
+        button.clipsToBounds = true
+        button.tintColor = .white
+        button.accessibilityLabel = "使用 Apple 登入"
+        button.accessibilityIdentifier = "AppleSignInButton"
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(
             context.coordinator,
@@ -253,12 +260,36 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
             for: .touchUpInside
         )
 
+        let appleIcon = UIImageView(image: UIImage(systemName: "apple.logo"))
+        appleIcon.tintColor = .white
+        appleIcon.contentMode = .scaleAspectFit
+        appleIcon.isAccessibilityElement = false
+        appleIcon.translatesAutoresizingMaskIntoConstraints = false
+
+        let titleLabel = UILabel()
+        titleLabel.text = "使用 Apple 登入"
+        titleLabel.textColor = .white
+        titleLabel.font = .systemFont(ofSize: 14, weight: .semibold)
+        titleLabel.isAccessibilityElement = false
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        button.addSubview(appleIcon)
+        button.addSubview(titleLabel)
         container.addSubview(button)
+
         NSLayoutConstraint.activate([
             button.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             button.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             button.topAnchor.constraint(equalTo: container.topAnchor),
-            button.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+            button.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+
+            appleIcon.leadingAnchor.constraint(equalTo: button.leadingAnchor, constant: 10),
+            appleIcon.centerYAnchor.constraint(equalTo: button.centerYAnchor),
+            appleIcon.widthAnchor.constraint(equalToConstant: 24),
+            appleIcon.heightAnchor.constraint(equalToConstant: 24),
+
+            titleLabel.leadingAnchor.constraint(equalTo: appleIcon.trailingAnchor, constant: 14),
+            titleLabel.centerYAnchor.constraint(equalTo: button.centerYAnchor)
         ])
         return container
     }
