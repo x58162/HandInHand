@@ -209,7 +209,7 @@ struct ContentView: View {
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
-            guard authorization.credential is ASAuthorizationAppleIDCredential else {
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
                 showLoginMessage(
                     title: "Apple 登入未完成",
                     message: "Apple 沒有傳回有效的登入憑證，請再試一次。"
