@@ -228,8 +228,7 @@ struct MainInterfaceView: View {
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(.white.opacity(0.88))
 
-                Text("別讓心情，
-只留給自己。")
+                Text("別讓心情，\n只留給自己。")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
                     .lineSpacing(3)
                     .foregroundStyle(.white)
