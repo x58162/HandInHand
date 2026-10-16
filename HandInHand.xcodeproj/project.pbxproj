@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CED8E8ED3080CBB100B908FF /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = CED8E8EB3080CBB100B908FF /* GoogleSignIn */; };
+		CED8E8EE3080CBB100B908FF /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CED8E8EC3080CBB100B908FF /* GoogleSignInSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		CED8E8DC3080CBAD00B908FF /* HandInHand.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HandInHand.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CED8E8ED3080CBB100B908FF /* GoogleSignIn in Frameworks */,
+				CED8E8EE3080CBB100B908FF /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = HandInHand;
 			packageProductDependencies = (
+				CED8E8EB3080CBB100B908FF /* GoogleSignIn */,
+				CED8E8EC3080CBB100B908FF /* GoogleSignInSwift */,
 			);
 			productName = HandInHand;
 			productReference = CED8E8DC3080CBAD00B908FF /* HandInHand.app */;
@@ -82,6 +91,11 @@
 				TargetAttributes = {
 					CED8E8DB3080CBAD00B908FF = {
 						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.SignInWithApple = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -93,6 +107,9 @@
 				Base,
 			);
 			mainGroup = CED8E8D33080CBAD00B908FF;
+			packageReferences = (
+				CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CED8E8DD3080CBAD00B908FF /* Products */;
@@ -252,6 +269,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = HandInHand/HandInHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J6P55QL942;
 				ENABLE_PREVIEWS = YES;
@@ -284,6 +302,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = HandInHand/HandInHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = J6P55QL942;
 				ENABLE_PREVIEWS = YES;
@@ -311,6 +330,30 @@
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CED8E8EB3080CBB100B908FF /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		CED8E8EC3080CBB100B908FF /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
 		CED8E8D73080CBAD00B908FF /* Build configuration list for PBXProject "HandInHand" */ = {
