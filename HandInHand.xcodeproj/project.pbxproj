@@ -21,6 +21,8 @@
 		A10000000000000000000007 /* VoiceRoomSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* VoiceRoomSession.swift */; };
 		A10000000000000000000008 /* VoiceRoomDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* VoiceRoomDetailView.swift */; };
 
+		D10000000000000000000001 /* Mediasoup in Frameworks */ = {isa = PBXBuildFile; productRef = D10000000000000000000002 /* Mediasoup */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +49,7 @@
 			files = (
 				CED8E8ED3080CBB100B908FF /* GoogleSignIn in Frameworks */,
 				CED8E8EE3080CBB100B908FF /* GoogleSignInSwift in Frameworks */,
+				D10000000000000000000001 /* Mediasoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -104,6 +107,7 @@
 			packageProductDependencies = (
 				CED8E8EB3080CBB100B908FF /* GoogleSignIn */,
 				CED8E8EC3080CBB100B908FF /* GoogleSignInSwift */,
+				D10000000000000000000002 /* Mediasoup */,
 			);
 			productName = HandInHand;
 			productReference = CED8E8DC3080CBAD00B908FF /* HandInHand.app */;
@@ -140,6 +144,7 @@
 			mainGroup = CED8E8D33080CBAD00B908FF;
 			packageReferences = (
 				CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				D10000000000000000000003 /* XCRemoteSwiftPackageReference "mediasoup-client-swift" */,
 			);
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
@@ -383,6 +388,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		D10000000000000000000003 /* XCRemoteSwiftPackageReference "mediasoup-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/VLprojects/mediasoup-client-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.13.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -396,6 +409,8 @@
 			package = CED8E8EA3080CBB100B908FF /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
 		};
+		D10000000000000000000002 /* Mediasoup */ = {isa = XCSwiftPackageProductDependency; package = D10000000000000000000003 /* XCRemoteSwiftPackageReference "mediasoup-client-swift" */; productName = Mediasoup; };
+
 /* End XCSwiftPackageProductDependency section */
 
 /* Begin XCConfigurationList section */
