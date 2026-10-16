@@ -67,7 +67,7 @@ final class VoiceServerAPIClient {
     }
 
     func verifyGoogle(idToken: String) async throws -> GoogleVerifyResponse {
-        var request = URLRequest(url: VoiceServerAPI.baseURL.appendingPathComponent("auth/google/verify"))
+        var request = URLRequest(url: URL(string: "/auth/google/verify", relativeTo: VoiceServerAPI.baseURL)!.absoluteURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["credential": idToken])
@@ -82,7 +82,7 @@ final class VoiceServerAPIClient {
         gender: String,
         birthDate: String
     ) async throws -> ProfileCompleteResponse {
-        var request = URLRequest(url: VoiceServerAPI.baseURL.appendingPathComponent("api/profile/complete"))
+        var request = URLRequest(url: URL(string: "/api/profile/complete", relativeTo: VoiceServerAPI.baseURL)!.absoluteURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(sessionToken)", forHTTPHeaderField: "Authorization")
@@ -98,7 +98,7 @@ final class VoiceServerAPIClient {
 
     func logout(sessionToken: String) async {
         guard !sessionToken.isEmpty else { return }
-        var request = URLRequest(url: VoiceServerAPI.baseURL.appendingPathComponent("auth/logout"))
+        var request = URLRequest(url: URL(string: "/auth/logout", relativeTo: VoiceServerAPI.baseURL)!.absoluteURL)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(sessionToken)", forHTTPHeaderField: "Authorization")
