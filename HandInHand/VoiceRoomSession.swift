@@ -559,6 +559,8 @@ final class VoiceRoomSessionStore: ObservableObject,
         } catch {
             isStartingMicrophone = false
             pendingMicStart = false
+            micRequestPending = false
+            send(["type": "release_mic"])
             errorMessage = "無法啟用音訊：\(error.localizedDescription)"
             return
         }
@@ -602,6 +604,7 @@ final class VoiceRoomSessionStore: ObservableObject,
                     guard let self else { return }
                     self.isStartingMicrophone = false
                     self.isMicrophoneOn = false
+                    self.micRequestPending = false
                     self.errorMessage = "建立上行音訊失敗：\(error.localizedDescription)"
                     self.status = "麥克風啟用失敗"
                 }
@@ -867,6 +870,7 @@ final class VoiceRoomSessionStore: ObservableObject,
         isMicrophoneOn = false
         isStartingMicrophone = false
         pendingMicStart = false
+        didRequestRtpCapabilities = false
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 
