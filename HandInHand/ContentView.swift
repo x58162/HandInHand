@@ -80,6 +80,14 @@ struct ContentView: View {
                     .padding(.bottom, geometry.size.height * 0.17)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                if isAuthenticating {
+                    Color.black.opacity(0.35).ignoresSafeArea()
+                    ProgressView("正在連接牽手會員伺服器…")
+                        .font(.system(size: 14, weight: .semibold))
+                        .padding(22)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+                }
             }
         }
         .ignoresSafeArea(edges: .bottom)
@@ -149,26 +157,26 @@ struct ContentView: View {
         }
 
         GIDSignIn.sharedInstance.signIn(withPresenting: presentingViewController) { result, error in
-            if let error {
-                showLoginMessage(title: "Google 登入未完成", message: error.localizedDescription)
-                return
-            }
+            Task { @MainActor in
+                if let error {
+                    showLoginMessage(title: "Google 登入未完成", message: error.localizedDescription)
+                    return
+                }
 
-            guard let result else {
-                showLoginMessage(title: "Google 登入未完成", message: "Google 沒有傳回登入結果，請再試一次。")
-                return
-            }
+                guard let result else {
+                    showLoginMessage(title: "Google 登入未完成", message: "Google 沒有傳回登入結果，請再試一次。")
+                    return
+                }
 
-            guard let idToken = result.user.idToken?.tokenString, !idToken.isEmpty else {
-                showLoginMessage(
-                    title: "無法完成 Google 登入",
-                    message: "Google 沒有回傳 ID Token，請重新登入。"
-                )
-                return
-            }
+                guard let idToken = result.user.idToken?.tokenString, !idToken.isEmpty else {
+                    showLoginMessage(
+                        title: "無法完成 Google 登入",
+                        message: "Google 沒有回傳 ID Token，請重新登入。"
+                    )
+                    return
+                }
 
-            isAuthenticating = true
-            Task {
+                isAuthenticating = true
                 do {
                     let response = try await VoiceServerAPIClient.shared.verifyGoogle(idToken: idToken)
                     sessionToken = response.sessionToken
@@ -201,7 +209,7 @@ struct ContentView: View {
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            guard authorization.credential is ASAuthorizationAppleIDCredential else {
                 showLoginMessage(
                     title: "Apple 登入未完成",
                     message: "Apple 沒有傳回有效的登入憑證，請再試一次。"
