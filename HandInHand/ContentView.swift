@@ -22,7 +22,7 @@ struct ContentView: View {
 
                 VStack(spacing: 0) {
                     brandHeader
-                        .padding(.top, geometry.size.height * 0.025)
+                        .padding(.top, geometry.size.height * 0.07)
 
                     Spacer(minLength: 12)
 
