@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var loginMessageTitle = ""
     @State private var loginMessage = ""
 
+    private let brandPink = Color(red: 1.0, green: 0.77, blue: 0.97)
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -19,33 +21,83 @@ struct ContentView: View {
                     .clipped()
                     .ignoresSafeArea()
 
-                VStack(spacing: 14) {
-                    GoogleSignInButton(scheme: .light, style: .wide, action: handleGoogleSignIn)
-                        .frame(height: 50)
+                VStack(spacing: 0) {
+                    brandHeader
+                        .padding(.top, geometry.size.height * 0.025)
 
-                    SignInWithAppleButton(
-                        .signIn,
-                        onRequest: { request in
-                            request.requestedScopes = [.fullName, .email]
-                        },
-                        onCompletion: handleAppleSignIn
-                    )
-                    .signInWithAppleButtonStyle(.black)
-                    .frame(height: 50)
+                    Spacer(minLength: 12)
+
+                    VStack(spacing: 12) {
+                        GoogleSignInButton(
+                            scheme: .light,
+                            style: .wide,
+                            action: handleGoogleSignIn
+                        )
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+
+                        SignInWithAppleButton(
+                            .signIn,
+                            onRequest: { request in
+                                request.requestedScopes = [.fullName, .email]
+                            },
+                            onCompletion: handleAppleSignIn
+                        )
+                        .signInWithAppleButtonStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .cornerRadius(2)
+                    }
+                    .frame(maxWidth: 340)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, geometry.size.height * 0.17)
                 }
-                .frame(maxWidth: 340)
-                .padding(.horizontal, 30)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, max(geometry.safeAreaInsets.bottom, 26) + 42)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .ignoresSafeArea(edges: .bottom)
         .preferredColorScheme(.dark)
+        .environment(\.locale, Locale(identifier: "zh_TW"))
         .alert(loginMessageTitle, isPresented: $showingLoginMessage) {
             Button("知道了", role: .cancel) { }
         } message: {
             Text(loginMessage)
         }
+    }
+
+    private var brandHeader: some View {
+        VStack(spacing: 7) {
+            Text("牽手")
+                .font(.system(size: 58, weight: .medium, design: .serif))
+                .tracking(8)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            .white,
+                            Color(red: 1.0, green: 0.84, blue: 0.99),
+                            brandPink
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: brandPink.opacity(0.9), radius: 18)
+                .shadow(color: Color.purple.opacity(0.75), radius: 28)
+
+            Text("Q I A N   S H O U")
+                .font(.system(size: 10, weight: .medium, design: .serif))
+                .tracking(4)
+                .foregroundStyle(.white.opacity(0.92))
+
+            Text("今晚，找個人聊聊。")
+                .font(.system(size: 16, weight: .medium, design: .serif))
+                .tracking(2)
+                .foregroundStyle(.white.opacity(0.98))
+                .shadow(color: brandPink.opacity(0.7), radius: 8)
+                .padding(.top, 4)
+        }
+        .multilineTextAlignment(.center)
+        .accessibilityElement(children: .combine)
     }
 
     private func handleGoogleSignIn() {
@@ -56,7 +108,7 @@ struct ContentView: View {
         else {
             showLoginMessage(
                 title: "Google 登入尚未設定",
-                message: "已改用 Google 官方按鈕。要開始登入，還需要在 Xcode 設定 iOS OAuth Client ID 與反向 URL Scheme。"
+                message: "還需要在 Xcode 設定 iOS OAuth Client ID 與反向 URL Scheme。"
             )
             return
         }
