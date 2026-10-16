@@ -47,7 +47,6 @@ struct ContentView: View {
             }
         }
         .ignoresSafeArea(edges: .bottom)
-        .preferredColorScheme(.dark)
         .environment(\.locale, Locale(identifier: "zh_TW"))
         .alert(loginMessageTitle, isPresented: $showingLoginMessage) {
             Button("知道了", role: .cancel) { }
@@ -243,6 +242,7 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let container = UIView()
         container.backgroundColor = .clear
+        context.coordinator.anchorView = container
 
         // Keep Apple's native authorization flow, while aligning the visual label
         // with Google's left-aligned icon/text layout.
@@ -304,12 +304,26 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
         ASAuthorizationControllerPresentationContextProviding {
         private let completion: (Result<ASAuthorization, Error>) -> Void
         private var authorizationController: ASAuthorizationController?
+        weak var anchorView: UIView?
+        private weak var presentationWindow: UIWindow?
 
         init(completion: @escaping (Result<ASAuthorization, Error>) -> Void) {
             self.completion = completion
         }
 
         @objc func didTap() {
+            // Present Apple's system authorization UI from the actual window
+            // containing this button, rather than a guessed or empty window.
+            guard let window = anchorView?.window else {
+                completion(.failure(NSError(
+                    domain: "HandInHand.AppleSignIn",
+                    code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "目前無法取得登入視窗，請稍後再試。"]
+                )))
+                return
+            }
+            presentationWindow = window
+
             let request = ASAuthorizationAppleIDProvider().createRequest()
             request.requestedScopes = [.fullName, .email]
 
@@ -339,6 +353,14 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
         }
 
         func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+            if let presentationWindow {
+                return presentationWindow
+            }
+
+            if let window = anchorView?.window {
+                return window
+            }
+
             let activeScene = UIApplication.shared.connectedScenes
                 .compactMap { $0 as? UIWindowScene }
                 .first { $0.activationState == .foregroundActive }
@@ -347,6 +369,9 @@ private struct OfficialAppleSignInButton: UIViewRepresentable {
                 return window
             }
 
+            // didTap() checks the button's window before starting a request.
+            // This fallback only protects against the window being detached
+            // during an authorization transition.
             return ASPresentationAnchor()
         }
     }
