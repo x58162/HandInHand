@@ -4,6 +4,7 @@ import AuthenticationServices
 import GoogleSignIn
 
 struct ContentView: View {
+    @State private var signedInUser: SignedInUser?
     @State private var showingLoginMessage = false
     @State private var loginMessageTitle = ""
     @State private var loginMessage = ""
