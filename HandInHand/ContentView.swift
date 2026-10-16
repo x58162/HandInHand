@@ -20,7 +20,7 @@ struct ContentView: View {
                     .ignoresSafeArea()
 
                 VStack(spacing: 14) {
-                    GoogleSignInButton(action: handleGoogleSignIn)
+                    GoogleSignInButton(scheme: .light, style: .wide, action: handleGoogleSignIn)
                         .frame(height: 50)
 
                     SignInWithAppleButton(
