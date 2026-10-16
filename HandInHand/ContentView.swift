@@ -217,12 +217,48 @@ struct ContentView: View {
                 return
             }
 
-            // The current server ZIP contains no Apple token-verification endpoint.
-            // Do not treat local Apple authorization alone as a completed member login.
-            showLoginMessage(
-                title: "Apple 身分驗證成功",
-                message: "Apple 已完成裝置端驗證，但牽手伺服器目前尚未實作 Apple 憑證驗證。要先接通會員資料庫，請暫時使用 Google 登入。"
-            )
+            guard
+                let tokenData = credential.identityToken,
+                let identityToken = String(data: tokenData, encoding: .utf8),
+                !identityToken.isEmpty
+            else {
+                showLoginMessage(
+                    title: "無法完成 Apple 登入",
+                    message: "Apple 沒有回傳 ID Token，請重新登入。"
+                )
+                return
+            }
+
+            isAuthenticating = true
+            Task { @MainActor in
+                do {
+                    let response = try await VoiceServerAPIClient.shared.verifyApple(
+                        identityToken: identityToken
+                    )
+                    sessionToken = response.sessionToken
+                    serverUserId = response.user.userId
+                    isAuthenticating = false
+
+                    if response.needsProfile || !response.user.profileCompleted {
+                        pendingProfile = PendingProfile(
+                            sessionToken: response.sessionToken,
+                            serverUser: response.user
+                        )
+                    } else {
+                        signedInUser = SignedInUser(
+                            displayName: response.user.displayName,
+                            email: response.user.email,
+                            provider: "Apple"
+                        )
+                    }
+                } catch {
+                    isAuthenticating = false
+                    showLoginMessage(
+                        title: "牽手伺服器 Apple 登入失敗",
+                        message: error.localizedDescription
+                    )
+                }
+            }
 
         case .failure(let error):
             if let authorizationError = error as? ASAuthorizationError,
