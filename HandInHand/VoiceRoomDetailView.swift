@@ -20,7 +20,7 @@ struct VoiceRoomDetailView: View {
         self.currentUserId = currentUserId
         self.onLeave = onLeave
         _store = StateObject(
-            wrappedValue: VoiceRoomSessionStore(roomId: room.roomId, sessionToken: sessionToken)
+            wrappedValue: VoiceRoomSessionStore(roomId: room.roomId, sessionToken: sessionToken, currentUserId: currentUserId)
         )
     }
 
@@ -410,23 +410,23 @@ struct VoiceRoomDetailView: View {
             HStack(spacing: 10) {
                 Button {
                     if isCurrentUserOnMic {
-                        store.releaseMic()
+                        store.toggleMicrophone()
                     } else {
                         store.requestMic()
                     }
                 } label: {
                     Label(
-                        isCurrentUserOnMic ? "下麥" : "我要上麥",
-                        systemImage: isCurrentUserOnMic ? "mic.slash.fill" : "hand.raised.fill"
+                        microphoneButtonTitle,
+                        systemImage: microphoneButtonSymbol
                     )
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(isCurrentUserOnMic ? Palette.rose : Palette.violet, in: Capsule())
+                    .background(store.isMicrophoneOn ? Palette.rose : Palette.violet, in: Capsule())
                 }
                 .buttonStyle(.plain)
-                .disabled(!store.isJoined)
+                .disabled(!store.isJoined || store.isStartingMicrophone)
 
                 Button(action: leaveRoom) {
                     Label("離開房間", systemImage: "rectangle.portrait.and.arrow.right")
@@ -445,6 +445,19 @@ struct VoiceRoomDetailView: View {
         .padding(.bottom, 12)
         .background(.ultraThinMaterial)
         .overlay(alignment: .top) { Rectangle().fill(Palette.line).frame(height: 1) }
+    }
+
+    private var microphoneButtonTitle: String {
+        if store.isStartingMicrophone { return "正在開啟…" }
+        if store.isMicrophoneOn { return "閉麥" }
+        if isCurrentUserOnMic { return "開麥" }
+        return "申請上麥"
+    }
+
+    private var microphoneButtonSymbol: String {
+        if store.isMicrophoneOn { return "mic.slash.fill" }
+        if isCurrentUserOnMic { return "mic.fill" }
+        return "hand.raised.fill"
     }
 
     private var occupiedSeatCount: Int {
