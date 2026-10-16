@@ -28,25 +28,18 @@ struct ContentView: View {
 
                     let buttonWidth = min(geometry.size.width - 60, 312)
 
-                    VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
                         OfficialGoogleSignInButton(action: handleGoogleSignIn)
-                            // The official Google view has a 4pt visual inset.
-                            // Its 320pt container therefore produces a centered 312pt visible button.
-                            .frame(width: buttonWidth + 8, height: 48, alignment: .center)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            // Google's official button has a 4pt visual inset on every side.
+                            .frame(width: buttonWidth + 8, height: 48)
 
-                        SignInWithAppleButton(
-                            .signIn,
-                            onRequest: { request in
-                                request.requestedScopes = [.fullName, .email]
-                            },
-                            onCompletion: handleAppleSignIn
-                        )
-                        .signInWithAppleButtonStyle(.black)
-                        .frame(width: buttonWidth, height: 40)
-                        .cornerRadius(2)
-                        .frame(width: buttonWidth, height: 48, alignment: .center)
+                        OfficialAppleSignInButton(completion: handleAppleSignIn)
+                            // Align Apple's visible left edge with Google's visible left edge (+4pt inset).
+                            .frame(width: buttonWidth, height: 40)
+                            .padding(.leading, 4)
+                            .frame(width: buttonWidth + 8, height: 48, alignment: .leading)
                     }
+                    .frame(width: buttonWidth + 8, alignment: .leading)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.bottom, geometry.size.height * 0.17)
                 }
@@ -239,6 +232,91 @@ private struct OfficialGoogleSignInButton: UIViewRepresentable {
 
         @objc func didTap() {
             action()
+        }
+    }
+}
+
+
+private struct OfficialAppleSignInButton: UIViewRepresentable {
+    let completion: (Result<ASAuthorization, Error>) -> Void
+
+    func makeUIView(context: Context) -> UIView {
+        let container = UIView()
+        container.backgroundColor = .clear
+
+        let button = ASAuthorizationAppleIDButton(type: .signIn, style: .black)
+        button.cornerRadius = 2
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(
+            context.coordinator,
+            action: #selector(Coordinator.didTap),
+            for: .touchUpInside
+        )
+
+        container.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            button.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            button.topAnchor.constraint(equalTo: container.topAnchor),
+            button.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        return container
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(completion: completion)
+    }
+
+    final class Coordinator: NSObject, ASAuthorizationControllerDelegate,
+        ASAuthorizationControllerPresentationContextProviding {
+        private let completion: (Result<ASAuthorization, Error>) -> Void
+        private var authorizationController: ASAuthorizationController?
+
+        init(completion: @escaping (Result<ASAuthorization, Error>) -> Void) {
+            self.completion = completion
+        }
+
+        @objc func didTap() {
+            let request = ASAuthorizationAppleIDProvider().createRequest()
+            request.requestedScopes = [.fullName, .email]
+
+            let controller = ASAuthorizationController(authorizationRequests: [request])
+            controller.delegate = self
+            controller.presentationContextProvider = self
+            authorizationController = controller
+            controller.performRequests()
+        }
+
+        func authorizationController(
+            controller: ASAuthorizationController,
+            didCompleteWithAuthorization authorization: ASAuthorization
+        ) {
+            DispatchQueue.main.async {
+                self.completion(.success(authorization))
+            }
+        }
+
+        func authorizationController(
+            controller: ASAuthorizationController,
+            didCompleteWithError error: Error
+        ) {
+            DispatchQueue.main.async {
+                self.completion(.failure(error))
+            }
+        }
+
+        func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+            let activeScene = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first { $0.activationState == .foregroundActive }
+
+            if let window = activeScene?.windows.first(where: { $0.isKeyWindow }) {
+                return window
+            }
+
+            return ASPresentationAnchor()
         }
     }
 }
